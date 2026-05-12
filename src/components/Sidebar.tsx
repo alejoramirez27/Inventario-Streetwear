@@ -51,9 +51,9 @@ export default function Sidebar() {
 
   return (
     <aside style={{
-      width: '240px', minHeight: '100vh', backgroundColor: '#111113',
+      width: '240px', height: '100vh', backgroundColor: '#111113',
       borderRight: '1px solid #27272a', display: 'flex', flexDirection: 'column',
-      position: 'fixed', top: 0, left: 0, zIndex: 100,
+      position: 'fixed', top: 0, left: 0, zIndex: 100, overflow: 'hidden',
     }}>
       {/* Marca */}
       <div style={{ padding: '28px 24px', borderBottom: '1px solid #27272a' }}>
@@ -69,7 +69,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navegación */}
-      <nav style={{ flex: 1, padding: '12px 10px' }}>
+      <nav style={{ flex: 1, padding: '12px 10px', overflowY: 'auto' }}>
         {links.map((link) => {
           const isActive = pathname === link.href
           return (
@@ -114,10 +114,10 @@ export default function Sidebar() {
         <button
           onClick={handleLogout}
           style={{
-            width: '100%', backgroundColor: 'transparent',
-            border: '1px solid #27272a', borderRadius: '6px',
-            padding: '8px 12px', color: '#71717a', fontSize: '12px',
-            cursor: 'pointer', textAlign: 'center',
+            width: '100%', backgroundColor: '#27272a',
+            border: '1px solid #3f3f46', borderRadius: '6px',
+            padding: '10px 12px', color: '#ffffff', fontSize: '12px',
+            fontWeight: '500', cursor: 'pointer', textAlign: 'center',
           }}
         >
           Cerrar sesión →
