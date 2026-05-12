@@ -14,7 +14,7 @@ const allLinks = [
   { href: '/colecciones', label: 'Colecciones', icon: '🗂️',  roles: ['administrador'] },
   { href: '/prendas',     label: 'Prendas',     icon: '👕',  roles: ['administrador'] },
   { href: '/inventario',  label: 'Inventario',  icon: '📦',  roles: ['administrador', 'bodeguero'] },
-  { href: '/solicitudes', label: 'Solicitudes', icon: '📋',  roles: ['administrador', 'bodeguero'] },
+  { href: '/solicitudes', label: 'Solicitudes', icon: '📋',  roles: ['administrador'] },
   { href: '/salidas',     label: 'Salidas',     icon: '📤',  roles: ['administrador', 'bodeguero'] },
   { href: '/clientes',    label: 'Aliados',     icon: '🤝',  roles: ['administrador', 'bodeguero'] },
   { href: '/reportes',    label: 'Reportes',    icon: '📈',  roles: ['administrador', 'bodeguero'] },

@@ -311,20 +311,30 @@ export default function PrendasPage() {
                   <p style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>{prenda.nombre}</p>
                   <p style={{ fontSize: '12px', color: '#52525b', marginTop: '2px' }}>{prenda.subcategoria}</p>
                 </div>
-                <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: '#27272a', color: '#a1a1aa', border: '1px solid #3f3f46', width: 'fit-content' }}>
-                  {prenda.categoria}
-                </span>
-                <p style={{ fontSize: '13px', color: '#71717a' }}>
-                  {prenda.coleccion?.nombre ?? '—'}
-                </p>
-                <span style={{
-                  fontSize: '11px', padding: '3px 10px', borderRadius: '999px', width: 'fit-content',
-                  backgroundColor: prenda.coleccion?.estado === 'activa' ? '#14532d' : '#1c1c1f',
-                  color: prenda.coleccion?.estado === 'activa' ? '#22c55e' : '#71717a',
-                  border: `1px solid ${prenda.coleccion?.estado === 'activa' ? '#166534' : '#27272a'}`,
-                }}>
-                  {prenda.coleccion?.estado?.toUpperCase() ?? '—'}
-                </span>
+                <div>
+                  <p style={miniLabel}>Categoría</p>
+                  <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: '#27272a', color: '#a1a1aa', border: '1px solid #3f3f46', display: 'inline-block', marginTop: '4px' }}>
+                    {prenda.categoria}
+                  </span>
+                </div>
+                <div>
+                  <p style={miniLabel}>Colección</p>
+                  <p style={{ fontSize: '13px', color: '#ffffff', fontWeight: '500', marginTop: '4px' }}>
+                    {prenda.coleccion?.nombre ?? '—'}
+                  </p>
+                </div>
+                <div>
+                  <p style={miniLabel}>Estado</p>
+                  <span style={{
+                    fontSize: '11px', padding: '3px 10px', borderRadius: '999px',
+                    display: 'inline-block', marginTop: '4px',
+                    backgroundColor: prenda.coleccion?.estado === 'activa' ? '#14532d' : '#1c1c1f',
+                    color: prenda.coleccion?.estado === 'activa' ? '#22c55e' : '#71717a',
+                    border: `1px solid ${prenda.coleccion?.estado === 'activa' ? '#166534' : '#27272a'}`,
+                  }}>
+                    {prenda.coleccion?.estado?.toUpperCase() ?? '—'}
+                  </span>
+                </div>
                 <div style={{ display: 'flex', gap: '8px' }} onClick={e => e.stopPropagation()}>
                   <button onClick={() => handleEliminar(prenda)} style={{ ...btnSecundario, color: '#ef4444' }}>
                     Eliminar
@@ -433,4 +443,12 @@ const labelStyle: React.CSSProperties = {
   letterSpacing: '1px',
   display: 'block',
   marginBottom: '8px',
+}
+
+const miniLabel: React.CSSProperties = {
+  fontSize: '10px',
+  color: '#52525b',
+  textTransform: 'uppercase',
+  letterSpacing: '1px',
+  fontWeight: '600',
 }
