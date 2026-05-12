@@ -1,38 +1,32 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
-// GET /api/salidas → historial de salidas
+// GET /api/clientes
 export async function GET() {
   const supabase = createServiceClient()
   const { data, error } = await supabase
-    .from('salida_bodega')
-    .select(`
-      *,
-      sku:id_sku(codigo_sku, talla,
-        prenda:id_prenda(nombre, categoria)
-      ),
-      usuario:id_usuario(nombre),
-      cliente:id_cliente(nombre, ciudad, departamento)
-    `)
-    .order('fecha_salida', { ascending: false })
+    .from('cliente')
+    .select('*')
+    .order('nombre')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
 
-// POST /api/salidas → registra una salida de bodega (el trigger descuenta el stock)
+// POST /api/clientes
 export async function POST(request: Request) {
   const supabase = createServiceClient()
   const body = await request.json()
 
   const { data, error } = await supabase
-    .from('salida_bodega')
+    .from('cliente')
     .insert([{
-      id_sku:      body.id_sku,
-      id_usuario:  body.id_usuario,
-      id_cliente:  body.id_cliente,
-      cantidad:    body.cantidad,
-      observacion: body.observacion ?? null,
+      nombre:       body.nombre,
+      ciudad:       body.ciudad,
+      departamento: body.departamento ?? null,
+      telefono:     body.telefono    ?? null,
+      email:        body.email       ?? null,
+      estado:       'activo',
     }])
     .select()
     .single()

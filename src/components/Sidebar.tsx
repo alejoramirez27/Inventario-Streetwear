@@ -10,13 +10,14 @@ interface Session {
 }
 
 const allLinks = [
-  { href: '/',            label: 'Dashboard',   icon: '◈', roles: ['administrador', 'bodeguero'] },
-  { href: '/colecciones', label: 'Colecciones', icon: '◻', roles: ['administrador'] },
-  { href: '/prendas',     label: 'Prendas',     icon: '◈', roles: ['administrador'] },
-  { href: '/inventario',  label: 'Inventario',  icon: '▦', roles: ['administrador', 'bodeguero'] },
-  { href: '/solicitudes', label: 'Solicitudes', icon: '◉', roles: ['administrador', 'bodeguero'] },
-  { href: '/salidas',     label: 'Salidas',     icon: '▷', roles: ['administrador', 'bodeguero'] },
-  { href: '/reportes',    label: 'Reportes',    icon: '▤', roles: ['administrador'] },
+  { href: '/',            label: 'Dashboard',   icon: '📊', roles: ['administrador', 'bodeguero'] },
+  { href: '/colecciones', label: 'Colecciones', icon: '🗂️',  roles: ['administrador'] },
+  { href: '/prendas',     label: 'Prendas',     icon: '👕',  roles: ['administrador'] },
+  { href: '/inventario',  label: 'Inventario',  icon: '📦',  roles: ['administrador', 'bodeguero'] },
+  { href: '/solicitudes', label: 'Solicitudes', icon: '📋',  roles: ['administrador', 'bodeguero'] },
+  { href: '/salidas',     label: 'Salidas',     icon: '📤',  roles: ['administrador', 'bodeguero'] },
+  { href: '/clientes',    label: 'Aliados',     icon: '🤝',  roles: ['administrador', 'bodeguero'] },
+  { href: '/reportes',    label: 'Reportes',    icon: '📈',  roles: ['administrador', 'bodeguero'] },
 ]
 
 function parseSession(): Session | null {
@@ -41,7 +42,7 @@ export default function Sidebar() {
 
   const links = session
     ? allLinks.filter(l => l.roles.includes(session.rol))
-    : allLinks  // mientras hidrata, muestra todos (el middleware ya protege)
+    : allLinks
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
@@ -50,37 +51,41 @@ export default function Sidebar() {
 
   return (
     <aside style={{
-      width: '240px', minHeight: '100vh', backgroundColor: '#18181b',
+      width: '240px', minHeight: '100vh', backgroundColor: '#111113',
       borderRight: '1px solid #27272a', display: 'flex', flexDirection: 'column',
       position: 'fixed', top: 0, left: 0, zIndex: 100,
     }}>
       {/* Marca */}
       <div style={{ padding: '28px 24px', borderBottom: '1px solid #27272a' }}>
-        <p style={{ fontSize: '11px', color: '#71717a', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '4px' }}>
+        <p style={{ fontSize: '10px', color: '#52525b', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '6px' }}>
           Sistema de
         </p>
-        <h1 style={{ fontSize: '16px', fontWeight: '700', color: '#ffffff', letterSpacing: '1px' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: '800', color: '#ffffff', letterSpacing: '2px' }}>
           INVENTARIO
         </h1>
-        <p style={{ fontSize: '11px', color: '#71717a', letterSpacing: '2px', textTransform: 'uppercase' }}>
+        <p style={{ fontSize: '10px', color: '#52525b', letterSpacing: '3px', textTransform: 'uppercase', marginTop: '2px' }}>
           Streetwear
         </p>
       </div>
 
       {/* Navegación */}
-      <nav style={{ flex: 1, padding: '16px 12px' }}>
+      <nav style={{ flex: 1, padding: '12px 10px' }}>
         {links.map((link) => {
           const isActive = pathname === link.href
           return (
             <Link key={link.href} href={link.href} style={{
-              display: 'flex', alignItems: 'center', gap: '12px',
+              display: 'flex', alignItems: 'center', gap: '10px',
               padding: '10px 12px', marginBottom: '2px', borderRadius: '8px',
-              textDecoration: 'none', fontSize: '14px',
+              textDecoration: 'none', fontSize: '13.5px',
               fontWeight: isActive ? '600' : '400',
               color: isActive ? '#ffffff' : '#71717a',
               backgroundColor: isActive ? '#27272a' : 'transparent',
+              borderLeft: isActive ? '3px solid #ffffff' : '3px solid transparent',
+              transition: 'all 0.15s ease',
             }}>
-              <span style={{ fontSize: '16px' }}>{link.icon}</span>
+              <span style={{ fontSize: '15px', width: '20px', textAlign: 'center' }}>
+                {link.icon}
+              </span>
               {link.label}
             </Link>
           )
@@ -90,12 +95,15 @@ export default function Sidebar() {
       {/* Usuario + Logout */}
       <div style={{ padding: '16px', borderTop: '1px solid #27272a' }}>
         {session && (
-          <div style={{ marginBottom: '12px' }}>
+          <div style={{
+            backgroundColor: '#1c1c1f', borderRadius: '8px',
+            padding: '12px', marginBottom: '10px',
+          }}>
             <p style={{ fontSize: '13px', color: '#ffffff', fontWeight: '600', marginBottom: '4px' }}>
               {session.nombre}
             </p>
             <span style={{
-              fontSize: '10px', color: '#71717a', textTransform: 'uppercase',
+              fontSize: '10px', color: '#a1a1aa', textTransform: 'uppercase',
               letterSpacing: '1px', backgroundColor: '#27272a',
               padding: '2px 8px', borderRadius: '4px',
             }}>
@@ -109,7 +117,7 @@ export default function Sidebar() {
             width: '100%', backgroundColor: 'transparent',
             border: '1px solid #27272a', borderRadius: '6px',
             padding: '8px 12px', color: '#71717a', fontSize: '12px',
-            cursor: 'pointer', textAlign: 'left',
+            cursor: 'pointer', textAlign: 'center',
           }}
         >
           Cerrar sesión →

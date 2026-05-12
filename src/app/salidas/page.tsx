@@ -2,29 +2,31 @@
 import { useEffect, useState } from 'react'
 
 interface Salida {
-  id_salida: string
+  id_salida:    string
   fecha_salida: string
-  cantidad: number
-  observacion: string | null
-  sku: { codigo_sku: string; talla: string; prenda: { nombre: string; categoria: string } }
-  usuario: { nombre: string }
+  cantidad:     number
+  observacion:  string | null
+  sku:          { codigo_sku: string; talla: string; prenda: { nombre: string; categoria: string } }
+  usuario:      { nombre: string }
+  cliente:      { nombre: string; ciudad: string; departamento: string }
 }
 
 interface Opcion { id: string; nombre: string }
 
 export default function SalidasPage() {
-  const [salidas, setSalidas]       = useState<Salida[]>([])
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState('')
-  const [exito, setExito]           = useState('')
-  const [mostrarForm, setMostrarForm] = useState(false)
-  const [guardando, setGuardando]   = useState(false)
+  const [salidas, setSalidas]           = useState<Salida[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState('')
+  const [exito, setExito]               = useState('')
+  const [mostrarForm, setMostrarForm]   = useState(false)
+  const [guardando, setGuardando]       = useState(false)
 
-  const [skus, setSkus]         = useState<any[]>([])
-  const [usuarios, setUsuarios] = useState<Opcion[]>([])
+  const [skus, setSkus]           = useState<any[]>([])
+  const [usuarios, setUsuarios]   = useState<Opcion[]>([])
+  const [clientes, setClientes]   = useState<any[]>([])
 
   const [form, setForm] = useState({
-    id_sku: '', id_usuario: '', cantidad: '', observacion: ''
+    id_sku: '', id_usuario: '', id_cliente: '', cantidad: '', observacion: ''
   })
 
   const cargarSalidas = () => {
@@ -39,6 +41,8 @@ export default function SalidasPage() {
     fetch('/api/sku').then(r => r.json()).then(setSkus)
     fetch('/api/usuarios').then(r => r.json())
       .then(d => setUsuarios(d.map((u: any) => ({ id: u.id_usuario, nombre: `${u.nombre} (${u.rol})` }))))
+    fetch('/api/clientes').then(r => r.json())
+      .then(d => setClientes(Array.isArray(d) ? d.filter((c: any) => c.estado === 'activo') : []))
   }
 
   useEffect(() => { cargarSalidas(); cargarSelects() }, [])
@@ -55,7 +59,7 @@ export default function SalidasPage() {
     if (!res.ok) { setError(data.error) }
     else {
       setExito('Salida registrada — stock descontado automáticamente')
-      setForm({ id_sku: '', id_usuario: '', cantidad: '', observacion: '' })
+      setForm({ id_sku: '', id_usuario: '', id_cliente: '', cantidad: '', observacion: '' })
       setMostrarForm(false)
       cargarSalidas()
       setTimeout(() => setExito(''), 4000)
@@ -63,7 +67,8 @@ export default function SalidasPage() {
     setGuardando(false)
   }
 
-  const skuSeleccionado = skus.find(s => s.id_sku === form.id_sku)
+  const skuSeleccionado      = skus.find(s => s.id_sku === form.id_sku)
+  const clienteSeleccionado  = clientes.find(c => c.id_cliente === form.id_cliente)
 
   return (
     <div>
@@ -72,7 +77,7 @@ export default function SalidasPage() {
         <div>
           <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#ffffff' }}>Salidas de Bodega</h2>
           <p style={{ fontSize: '14px', color: '#52525b', marginTop: '4px' }}>
-            Registra despachos y salidas de mercancía — el stock se descuenta automáticamente
+            Registra despachos hacia aliados multimarca — el stock se descuenta automáticamente
           </p>
         </div>
         <button onClick={() => setMostrarForm(!mostrarForm)} style={btnPrimario}>
@@ -80,15 +85,16 @@ export default function SalidasPage() {
         </button>
       </div>
 
-      {/* Mensajes */}
       {error && <div style={estiloError}>⚠ {error}</div>}
       {exito && <div style={estiloExito}>✓ {exito}</div>}
 
-      {/* Formulario nueva salida */}
+      {/* Formulario */}
       {mostrarForm && (
         <div style={cardStyle}>
           <h3 style={tituloCard}>Registrar Salida</h3>
           <form onSubmit={handleCrear}>
+
+            {/* Fila 1: SKU + Cantidad + Responsable */}
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div>
                 <label style={labelStyle}>SKU *</label>
@@ -122,31 +128,71 @@ export default function SalidasPage() {
               </div>
             </div>
 
-            {/* Info del SKU seleccionado */}
+            {/* Preview SKU seleccionado */}
             {skuSeleccionado && (
-              <div style={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', display: 'flex', gap: '32px' }}>
-                <div>
-                  <p style={{ fontSize: '11px', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px' }}>Prenda</p>
-                  <p style={{ fontSize: '14px', color: '#ffffff', marginTop: '4px' }}>{skuSeleccionado.prenda?.nombre ?? '—'}</p>
+              <div style={previewBox}>
+                <div style={previewItem}>
+                  <p style={labelPreview}>Prenda</p>
+                  <p style={valorPreview}>{skuSeleccionado.prenda?.nombre ?? '—'}</p>
                 </div>
-                <div>
-                  <p style={{ fontSize: '11px', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px' }}>Talla</p>
-                  <p style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff', marginTop: '4px' }}>{skuSeleccionado.talla}</p>
+                <div style={previewItem}>
+                  <p style={labelPreview}>Talla</p>
+                  <p style={{ ...valorPreview, fontWeight: '700' }}>{skuSeleccionado.talla}</p>
                 </div>
-                <div>
-                  <p style={{ fontSize: '11px', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px' }}>Stock disponible</p>
-                  <p style={{ fontSize: '14px', fontWeight: '700', color: skuSeleccionado.stock > 0 ? '#22c55e' : '#ef4444', marginTop: '4px' }}>
+                <div style={previewItem}>
+                  <p style={labelPreview}>Stock disponible</p>
+                  <p style={{ ...valorPreview, fontWeight: '700', color: skuSeleccionado.stock > 0 ? '#22c55e' : '#ef4444' }}>
                     {skuSeleccionado.stock} unidades
                   </p>
                 </div>
               </div>
             )}
 
+            {/* Fila 2: Cliente destino */}
             <div style={{ marginBottom: '16px' }}>
+              <label style={labelStyle}>Aliado / Cliente destino *</label>
+              <select required value={form.id_cliente}
+                onChange={e => setForm({ ...form, id_cliente: e.target.value })}
+                style={inputStyle}>
+                <option value="">Selecciona el aliado multimarca</option>
+                {clientes.map((c: any) => (
+                  <option key={c.id_cliente} value={c.id_cliente}>
+                    {c.nombre} — {c.ciudad}, {c.departamento}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Preview cliente seleccionado */}
+            {clienteSeleccionado && (
+              <div style={previewBox}>
+                <div style={previewItem}>
+                  <p style={labelPreview}>Aliado</p>
+                  <p style={valorPreview}>{clienteSeleccionado.nombre}</p>
+                </div>
+                <div style={previewItem}>
+                  <p style={labelPreview}>Ciudad</p>
+                  <p style={valorPreview}>{clienteSeleccionado.ciudad}</p>
+                </div>
+                <div style={previewItem}>
+                  <p style={labelPreview}>Departamento</p>
+                  <p style={valorPreview}>{clienteSeleccionado.departamento ?? '—'}</p>
+                </div>
+                {clienteSeleccionado.telefono && (
+                  <div style={previewItem}>
+                    <p style={labelPreview}>Teléfono</p>
+                    <p style={valorPreview}>{clienteSeleccionado.telefono}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Observación */}
+            <div style={{ marginBottom: '20px' }}>
               <label style={labelStyle}>Observación</label>
               <input value={form.observacion}
                 onChange={e => setForm({ ...form, observacion: e.target.value })}
-                placeholder="Motivo de salida, destino, etc."
+                placeholder="Notas adicionales sobre el despacho..."
                 style={inputStyle} />
             </div>
 
@@ -158,12 +204,14 @@ export default function SalidasPage() {
         </div>
       )}
 
-      {/* Tabla de historial */}
+      {/* Historial */}
       <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', overflow: 'hidden' }}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid #27272a' }}>
           <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#ffffff' }}>
             Historial de salidas
-            <span style={{ marginLeft: '10px', fontSize: '13px', color: '#52525b', fontWeight: '400' }}>({salidas.length})</span>
+            <span style={{ marginLeft: '10px', fontSize: '13px', color: '#52525b', fontWeight: '400' }}>
+              ({salidas.length})
+            </span>
           </h3>
         </div>
 
@@ -177,16 +225,15 @@ export default function SalidasPage() {
           </div>
         ) : (
           <>
-            {/* Header tabla */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 2fr', padding: '12px 24px', borderBottom: '1px solid #27272a' }}>
-              {['Prenda', 'SKU / Talla', 'Cantidad', 'Responsable', 'Fecha / Observación'].map(h => (
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 1fr', padding: '12px 24px', borderBottom: '1px solid #27272a' }}>
+              {['Prenda', 'SKU / Talla', 'Cantidad', 'Aliado destino', 'Fecha'].map(h => (
                 <p key={h} style={{ fontSize: '11px', color: '#52525b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>{h}</p>
               ))}
             </div>
 
             {salidas.map((s) => (
               <div key={s.id_salida} style={{
-                display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 2fr',
+                display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 1fr',
                 alignItems: 'center', padding: '16px 24px',
                 borderBottom: '1px solid #1c1c1f',
               }}>
@@ -205,13 +252,22 @@ export default function SalidasPage() {
                 <p style={{ fontSize: '22px', fontWeight: '700', color: '#ef4444' }}>
                   -{s.cantidad}
                 </p>
-                <p style={{ fontSize: '13px', color: '#a1a1aa' }}>{s.usuario?.nombre ?? '—'}</p>
+                <div>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>
+                    {s.cliente?.nombre ?? '—'}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#52525b', marginTop: '2px' }}>
+                    {s.cliente?.ciudad}{s.cliente?.departamento ? `, ${s.cliente.departamento}` : ''}
+                  </p>
+                </div>
                 <div>
                   <p style={{ fontSize: '12px', color: '#71717a' }}>
-                    {new Date(s.fecha_salida).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    {new Date(s.fecha_salida).toLocaleDateString('es-CO', {
+                      day: '2-digit', month: 'short', year: 'numeric'
+                    })}
                   </p>
                   {s.observacion && (
-                    <p style={{ fontSize: '12px', color: '#52525b', marginTop: '4px', fontStyle: 'italic' }}>
+                    <p style={{ fontSize: '11px', color: '#3f3f46', marginTop: '4px', fontStyle: 'italic' }}>
                       "{s.observacion}"
                     </p>
                   )}
@@ -225,7 +281,7 @@ export default function SalidasPage() {
   )
 }
 
-// ── Estilos ─────────────────────────────────────────────
+// ── Estilos ──────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
   width: '100%', backgroundColor: '#09090b', border: '1px solid #27272a',
   borderRadius: '8px', padding: '10px 14px', fontSize: '14px', color: '#ffffff', outline: 'none',
@@ -233,6 +289,22 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontSize: '12px', color: '#71717a', textTransform: 'uppercase',
   letterSpacing: '1px', display: 'block', marginBottom: '8px',
+}
+const previewBox: React.CSSProperties = {
+  backgroundColor: '#09090b', border: '1px solid #27272a',
+  borderRadius: '8px', padding: '16px 20px', marginBottom: '16px',
+  display: 'flex', gap: '0',
+}
+const previewItem: React.CSSProperties = {
+  flex: 1, paddingRight: '20px',
+  borderRight: '1px solid #27272a', marginRight: '20px',
+}
+const labelPreview: React.CSSProperties = {
+  fontSize: '11px', color: '#52525b', textTransform: 'uppercase',
+  letterSpacing: '1px', marginBottom: '6px',
+}
+const valorPreview: React.CSSProperties = {
+  fontSize: '14px', color: '#ffffff', fontWeight: '500',
 }
 const btnPrimario: React.CSSProperties = {
   backgroundColor: '#ffffff', color: '#09090b', border: 'none',

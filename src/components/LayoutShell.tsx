@@ -21,15 +21,23 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       }}>
         <header style={{
           borderBottom: '1px solid #27272a',
-          padding: '16px 32px',
-          backgroundColor: '#09090b',
+          padding: '14px 32px',
+          backgroundColor: '#111113',
           position: 'sticky',
           top: 0,
           zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}>
-          <p style={{ fontSize: '12px', color: '#3f3f46', letterSpacing: '2px', textTransform: 'uppercase' }}>
+          <p style={{ fontSize: '11px', color: '#3f3f46', letterSpacing: '3px', textTransform: 'uppercase' }}>
             Plataforma de Inventario — Bases de Datos
           </p>
+          <div style={{
+            width: '8px', height: '8px', borderRadius: '50%',
+            backgroundColor: '#22c55e',
+            boxShadow: '0 0 6px #22c55e',
+          }} />
         </header>
         <div style={{ padding: '32px' }}>
           {children}
