@@ -367,17 +367,24 @@ export default function SolicitudesPage() {
                 }}
               >
                 <div>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>
+                  <p style={miniLabel}>Proveedor</p>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff', marginTop: '3px' }}>
                     {sol.proveedor?.nombre ?? '—'}
                   </p>
-                  <p style={{ fontSize: '12px', color: '#52525b', marginTop: '2px' }}>
-                    {sol.usuario?.nombre ?? '—'}
+                  <p style={{ fontSize: '11px', color: '#52525b', marginTop: '3px' }}>
+                    <span style={miniLabel}>Registrado por: </span>{sol.usuario?.nombre ?? '—'}
                   </p>
                 </div>
-                <p style={{ fontSize: '13px', color: '#a1a1aa' }}>{sol.coleccion?.nombre ?? '—'}</p>
-                <p style={{ fontSize: '12px', color: '#71717a' }}>
-                  {new Date(sol.fecha_solicitud).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </p>
+                <div>
+                  <p style={miniLabel}>Colección</p>
+                  <p style={{ fontSize: '13px', color: '#ffffff', fontWeight: '500', marginTop: '3px' }}>{sol.coleccion?.nombre ?? '—'}</p>
+                </div>
+                <div>
+                  <p style={miniLabel}>Fecha solicitud</p>
+                  <p style={{ fontSize: '13px', color: '#a1a1aa', marginTop: '3px' }}>
+                    {new Date(sol.fecha_solicitud).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
                 <EstadoBadge estado={sol.estado} />
                 <p style={{ fontSize: '20px', color: '#3f3f46', textAlign: 'right' }}>
                   {expandida === sol.id_solicitud ? '▲' : '▼'}
@@ -541,4 +548,8 @@ const estiloError: React.CSSProperties = {
 const estiloExito: React.CSSProperties = {
   backgroundColor: '#052e16', border: '1px solid #166534', borderRadius: '8px',
   padding: '14px 18px', marginBottom: '20px', color: '#22c55e', fontSize: '14px',
+}
+const miniLabel: React.CSSProperties = {
+  fontSize: '10px', color: '#52525b', textTransform: 'uppercase',
+  letterSpacing: '1px', fontWeight: '600',
 }
