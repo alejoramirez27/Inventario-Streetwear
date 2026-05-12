@@ -5,6 +5,7 @@ export async function POST() {
   response.cookies.set('inv_session', '', {
     path: '/',
     maxAge: 0,
+    sameSite: 'lax',
   })
   return response
 }
