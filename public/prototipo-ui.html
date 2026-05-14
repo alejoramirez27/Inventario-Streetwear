@@ -634,8 +634,6 @@ tbody tr:nth-child(n+9){animation-delay:.18s}
         <button class="fb" onclick="pfCat('ACCESORIOS',this)">Accesorios</button>
         <div class="fsep"></div>
         <button class="fb on" onclick="pfCol('todos',this)">Todas</button>
-        <button class="fb" onclick="pfCol('1',this)">DROP 001</button>
-        <button class="fb" onclick="pfCol('2',this)">ORIGEN</button>
       </div>
       <div class="tc"><table><thead><tr>
         <th>Nombre</th><th>Categoría</th><th>Subcategoría</th><th>Colección</th>
@@ -657,8 +655,6 @@ tbody tr:nth-child(n+9){animation-delay:.18s}
         <button class="fb" onclick="ifSt('ag',this)">Agotados</button>
         <div class="fsep"></div>
         <button class="fb on" onclick="ifCo('todos',this)">Todas</button>
-        <button class="fb" onclick="ifCo('1',this)">DROP 001</button>
-        <button class="fb" onclick="ifCo('2',this)">ORIGEN</button>
       </div>
       <div class="tc"><table><thead><tr>
         <th>Código SKU</th><th>Prenda</th><th>Talla</th><th>Stock inicial</th><th>Stock actual</th><th>Colección</th><th>Estado</th>
@@ -831,73 +827,16 @@ tbody tr:nth-child(n+9){animation-delay:.18s}
 <div id="toast"></div>
 
 <script>
-/* ── MOCK DATA ─────────────────────────────────────── */
+/* ── LIVE DATA (Supabase via API) ──────────────────── */
 const DB = {
-  users:[
-    {id:1,nombre:'Carlos Mendoza',email:'admin@streetwear.co',pass:'admin123',rol:'administrador'},
-    {id:2,nombre:'Diego Vargas',email:'bodeguero@streetwear.co',pass:'bod123',rol:'bodeguero'},
-  ],
-  colecciones:[
-    {id:1,nombre:'DROP 001 — INVIERNO 2025',temporada:'INVIERNO 2025',fecha:'2025-01-15',estado:'activa'},
-    {id:2,nombre:'ORIGEN — VERANO 2024',temporada:'VERANO 2024',fecha:'2024-06-01',estado:'inactiva'},
-  ],
-  prendas:[
-    {id:1,id_col:1,nombre:'Hoodie Oversize',cat:'ROPA',sub:'Hoodie'},
-    {id:2,id_col:1,nombre:'Camiseta Oversize Vol.1',cat:'ROPA',sub:'Camiseta Oversize'},
-    {id:3,id_col:1,nombre:'Jean Baggy',cat:'ROPA',sub:'Jean'},
-    {id:4,id_col:1,nombre:'Gorra Snapback',cat:'ACCESORIOS',sub:'Gorra'},
-    {id:5,id_col:1,nombre:'Chaqueta Cargo',cat:'ROPA',sub:'Chaqueta'},
-    {id:6,id_col:2,nombre:'Camiseta Slim Vol.1',cat:'ROPA',sub:'Camiseta Slim fit'},
-    {id:7,id_col:2,nombre:'Short Cargo',cat:'ROPA',sub:'Short'},
-    {id:8,id_col:2,nombre:'Sudadera Jogger',cat:'ROPA',sub:'Sudadera'},
-  ],
-  skus:[
-    {id:1, id_pr:1,sku:'SW-HOO-S-001',talla:'S', stock:3, ini:20},
-    {id:2, id_pr:1,sku:'SW-HOO-M-001',talla:'M', stock:14,ini:25},
-    {id:3, id_pr:1,sku:'SW-HOO-L-001',talla:'L', stock:2, ini:20},
-    {id:4, id_pr:2,sku:'SW-CAM-S-002',talla:'S', stock:0, ini:15},
-    {id:5, id_pr:2,sku:'SW-CAM-M-002',talla:'M', stock:8, ini:20},
-    {id:6, id_pr:2,sku:'SW-CAM-L-002',talla:'L', stock:5, ini:15},
-    {id:7, id_pr:3,sku:'SW-JEA-M-003',talla:'M', stock:2, ini:10},
-    {id:8, id_pr:3,sku:'SW-JEA-L-003',talla:'L', stock:7, ini:10},
-    {id:9, id_pr:4,sku:'SW-GOR-U-004',talla:'U', stock:12,ini:30},
-    {id:10,id_pr:5,sku:'SW-CHA-M-005',talla:'M', stock:0, ini:8 },
-    {id:11,id_pr:5,sku:'SW-CHA-L-005',talla:'L', stock:4, ini:8 },
-    {id:12,id_pr:6,sku:'OR-CAM-S-006',talla:'S', stock:3, ini:20},
-    {id:13,id_pr:7,sku:'OR-SHO-M-007',talla:'M', stock:6, ini:12},
-    {id:14,id_pr:8,sku:'OR-SUD-L-008',talla:'L', stock:1, ini:10},
-    {id:15,id_pr:8,sku:'OR-SUD-XL-008',talla:'XL',stock:0,ini:10},
-  ],
-  proveedores:[
-    {id:1,nombre:'TextilesCo Medellín',contacto:'Andrés López',tel:'+57 300 111 2233',email:'ventas@textilesco.co'},
-    {id:2,nombre:'Confecciones Bogotá S.A.',contacto:'María Ruiz',tel:'+57 310 222 3344',email:'pedidos@confecbog.co'},
-    {id:3,nombre:'Hangzhou Garment Co.',contacto:'Wei Zhang',tel:'+86 571 8800 9900',email:'export@hzgarment.cn'},
-  ],
-  clientes:[
-    {id:1,nombre:'Urban Stitch Store',ciudad:'Medellín',depto:'Antioquia',tel:'+57 304 111 0001',email:'compras@urbanstitch.co',estado:'activo'},
-    {id:2,nombre:'Street Kulture',ciudad:'Bogotá',depto:'Cundinamarca',tel:'+57 315 222 0002',email:'pedidos@streetkulture.co',estado:'activo'},
-    {id:3,nombre:'La Bodega Cali',ciudad:'Cali',depto:'Valle del Cauca',tel:'+57 321 333 0003',email:'hola@labodegacali.com',estado:'activo'},
-    {id:4,nombre:'Northern Drop',ciudad:'Barranquilla',depto:'Atlántico',tel:'+57 302 444 0004',email:'info@northerndrop.co',estado:'inactivo'},
-  ],
-  solicitudes:[
-    {id:1,id_prov:1,id_col:1,id_usr:1,fecha:'2025-01-05',estado:'recibido_completo'},
-    {id:2,id_prov:3,id_col:1,id_usr:1,fecha:'2025-01-10',estado:'recibido_parcial'},
-  ],
-  det_sol:[
-    {id:1,id_sol:1,id_sku:1,sol:20,rec:20,ver:true},
-    {id:2,id_sol:1,id_sku:2,sol:25,rec:25,ver:true},
-    {id:3,id_sol:1,id_sku:3,sol:20,rec:20,ver:true},
-    {id:4,id_sol:2,id_sku:9,sol:30,rec:30,ver:true},
-    {id:5,id_sol:2,id_sku:10,sol:8,rec:4,ver:false},
-    {id:6,id_sol:2,id_sku:11,sol:8,rec:5,ver:false},
-  ],
-  salidas:[
-    {id:1,id_sku:2,id_usr:1,id_cli:1,cant:5,fecha:'2025-01-20',obs:'Primera entrega'},
-    {id:2,id_sku:5,id_usr:2,id_cli:2,cant:7,fecha:'2025-01-22',obs:''},
-    {id:3,id_sku:1,id_usr:1,id_cli:3,cant:10,fecha:'2025-01-25',obs:'Colección especial'},
-    {id:4,id_sku:8,id_usr:2,id_cli:1,cant:3,fecha:'2025-02-01',obs:''},
-    {id:5,id_sku:4,id_usr:1,id_cli:2,cant:15,fecha:'2025-02-05',obs:'Última unidad'},
-  ],
+  colecciones:[],
+  prendas:[],
+  skus:[],
+  proveedores:[],
+  clientes:[],
+  solicitudes:[],
+  salidas:[],
+  users:[],
 };
 
 /* ── STATE ─────────────────────────────────────────── */
@@ -912,6 +851,119 @@ const gPr = id => DB.proveedores.find(p=>p.id===id);
 const gCl = id => DB.clientes.find(c=>c.id===id);
 const gU  = id => DB.users.find(u=>u.id===id);
 const gAct= () => DB.colecciones.find(c=>c.estado==='activa');
+
+/* ── LOAD INDICATOR ────────────────────────────────── */
+function showLoading(){
+  let el=document.getElementById('loading-overlay');
+  if(!el){
+    el=document.createElement('div');
+    el.id='loading-overlay';
+    el.style.cssText='position:fixed;inset:0;background:rgba(8,8,8,.92);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:var(--fm);font-size:11px;letter-spacing:3px;color:var(--t2);text-transform:uppercase;';
+    el.textContent='Cargando datos…';
+    document.body.appendChild(el);
+  }
+  el.style.display='flex';
+}
+function hideLoading(){
+  const el=document.getElementById('loading-overlay');
+  if(el) el.style.display='none';
+}
+
+/* ── LOAD ALL DATA FROM SUPABASE ───────────────────── */
+async function loadAllData(){
+  try{
+    const [cols,prs,sks,provs,clis,sols,sals,usrs]=await Promise.all([
+      fetch('/api/colecciones').then(r=>r.json()),
+      fetch('/api/prendas').then(r=>r.json()),
+      fetch('/api/sku').then(r=>r.json()),
+      fetch('/api/proveedores').then(r=>r.json()),
+      fetch('/api/clientes').then(r=>r.json()),
+      fetch('/api/solicitudes').then(r=>r.json()),
+      fetch('/api/salidas').then(r=>r.json()),
+      fetch('/api/usuarios').then(r=>r.json()),
+    ]);
+
+    DB.colecciones=(Array.isArray(cols)?cols:[]).map(c=>({
+      id:c.id_coleccion, nombre:c.nombre, temporada:c.temporada,
+      fecha:c.fecha_lanzamiento, estado:c.estado,
+    }));
+
+    DB.prendas=(Array.isArray(prs)?prs:[]).map(p=>({
+      id:p.id_prenda, id_col:p.id_coleccion,
+      nombre:p.nombre, cat:p.categoria, sub:p.subcategoria,
+    }));
+
+    DB.skus=(Array.isArray(sks)?sks:[]).map(s=>({
+      id:s.id_sku, id_pr:s.id_prenda,
+      sku:s.codigo_sku, talla:s.talla,
+      stock:s.stock, ini:s.stock_inicial,
+    }));
+
+    DB.proveedores=(Array.isArray(provs)?provs:[]).map(p=>({
+      id:p.id_proveedor||p.id,
+      nombre:p.nombre,
+      contacto:p.contacto||'',
+      tel:p.telefono||p.tel||'',
+      email:p.email||'',
+    }));
+
+    DB.clientes=(Array.isArray(clis)?clis:[]).map(c=>({
+      id:c.id_cliente, nombre:c.nombre, ciudad:c.ciudad,
+      depto:c.departamento, tel:c.telefono,
+      email:c.email, estado:c.estado,
+    }));
+
+    // Solicitudes keep nested join objects for display
+    DB.solicitudes=(Array.isArray(sols)?sols:[]).map(s=>({
+      id:s.id_solicitud,
+      id_prov:s.id_proveedor, id_col:s.id_coleccion, id_usr:s.id_usuario,
+      fecha:s.fecha_solicitud, estado:s.estado,
+      _prov:s.proveedor, _col:s.coleccion,
+    }));
+
+    // Salidas keep nested join objects for display
+    DB.salidas=(Array.isArray(sals)?sals:[]).map(s=>({
+      id:s.id_salida,
+      id_sku:s.id_sku, id_usr:s.id_usuario, id_cli:s.id_cliente,
+      cant:s.cantidad, fecha:s.fecha_salida, obs:s.observacion||'',
+      _sku:s.sku, _usr:s.usuario, _cli:s.cliente,
+    }));
+
+    DB.users=(Array.isArray(usrs)?usrs:[]).map(u=>({
+      id:u.id_usuario, nombre:u.nombre, rol:u.rol,
+    }));
+
+    buildColFilters();
+  }catch(e){
+    console.error('loadAllData error:',e);
+    toast('Error al cargar datos de Supabase','err');
+  }
+}
+
+/* ── BUILD COLLECTION FILTER BUTTONS ──────────────── */
+function buildColFilters(){
+  const shortName=c=>c.nombre.split('—')[0].trim().split(' ').slice(0,2).join(' ');
+  const pfBar=document.getElementById('pf-bar');
+  const ifBar=document.getElementById('if-bar');
+  if(pfBar){
+    pfBar.querySelectorAll('.fb').forEach((b,i)=>{if(i>=4)b.remove()});
+    DB.colecciones.forEach(c=>{
+      const b=document.createElement('button');
+      b.className='fb'; b.textContent=shortName(c);
+      b.onclick=()=>pfCol(c.id,b);
+      pfBar.appendChild(b);
+    });
+  }
+  if(ifBar){
+    ifBar.querySelectorAll('.fb').forEach((b,i)=>{if(i>=4)b.remove()});
+    DB.colecciones.forEach(c=>{
+      const b=document.createElement('button');
+      b.className='fb'; b.textContent=shortName(c);
+      b.onclick=()=>ifCo(c.id,b);
+      ifBar.appendChild(b);
+    });
+  }
+}
 
 function skCls(s){
   if(s===0) return 'szero';
@@ -982,9 +1034,12 @@ async function doLogin(){
       return;
     }
     const session=parseSession();
-    currentUser={nombre:session?.nombre||email,rol:data.rol};
+    currentUser={nombre:session?.nombre||email,rol:data.rol,id:session?.id};
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('app').style.display='flex';
+    showLoading();
+    await loadAllData();
+    hideLoading();
     setRole(data.rol);
     go('dashboard');
   }catch{
@@ -1002,12 +1057,15 @@ async function doLogout(){
   document.getElementById('login-screen').classList.remove('hidden');
 }
 
-function checkExistingSession(){
+async function checkExistingSession(){
   const session=parseSession();
   if(session){
-    currentUser={nombre:session.nombre,rol:session.rol};
+    currentUser={nombre:session.nombre,rol:session.rol,id:session.id};
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('app').style.display='flex';
+    showLoading();
+    await loadAllData();
+    hideLoading();
     setRole(session.rol);
     go('dashboard');
   }
@@ -1016,8 +1074,7 @@ function checkExistingSession(){
 /* ── ROLE ──────────────────────────────────────────── */
 function setRole(r){
   role=r;
-  const u=DB.users.find(x=>x.rol===r)||currentUser;
-  document.getElementById('sb-uname').textContent=u?u.nombre:'—';
+  document.getElementById('sb-uname').textContent=currentUser?.nombre||'—';
   document.getElementById('sb-urole').textContent=r.toUpperCase();
   document.getElementById('btn-adm').classList.toggle('on',r==='administrador');
   document.getElementById('btn-bod').classList.toggle('on',r==='bodeguero');
@@ -1084,7 +1141,7 @@ function rDash(){
       <div style="font-family:var(--fm);font-size:8px;color:var(--t2);text-transform:uppercase;letter-spacing:2px">Colección activa</div>
       <div class="col-bar-name">${act.nombre}</div>
       <div class="col-bar-meta">${act.temporada} · ${fmtD(act.fecha)}</div>
-    </div>` : '';
+    </div>` : `<div class="col-bar"><div class="col-bar-name" style="color:var(--t2)">Sin colección activa</div></div>`;
 
   const lowSkus=[...DB.skus].filter(s=>s.stock<=5).sort((a,b)=>a.stock-b.stock).slice(0,6);
   document.getElementById('d-low').innerHTML=lowSkus.map(s=>{
@@ -1109,28 +1166,51 @@ function rCol(){
       <td style="font-family:var(--fm);font-size:10px">${fmtD(c.fecha)}</td>
       <td>${bdg(c.estado)}</td>
       <td>${c.estado==='inactiva'
-        ?`<button class="btn btn-g btn-sm" onclick="activar(${c.id})">Activar</button>`
+        ?`<button class="btn btn-g btn-sm" onclick="activar('${c.id}')">Activar</button>`
         :`<span style="font-family:var(--fm);font-size:8px;color:var(--t3)">Activa</span>`}</td>
-    </tr>`).join('');
+    </tr>`).join('')||`<tr><td colspan="5" class="nd">Sin colecciones</td></tr>`;
 }
-function activar(id){
-  DB.colecciones.forEach(c=>c.estado=c.id===id?'activa':'inactiva');
-  rCol(); toast('Colección activada');
+async function activar(id){
+  try{
+    await Promise.all(DB.colecciones.map(c=>
+      fetch(`/api/colecciones/${c.id}`,{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({nombre:c.nombre,temporada:c.temporada,fecha_lanzamiento:c.fecha,estado:c.id===id?'activa':'inactiva'}),
+      })
+    ));
+    const r=await fetch('/api/colecciones').then(x=>x.json());
+    DB.colecciones=(Array.isArray(r)?r:[]).map(c=>({
+      id:c.id_coleccion,nombre:c.nombre,temporada:c.temporada,fecha:c.fecha_lanzamiento,estado:c.estado,
+    }));
+    rCol(); rDash(); toast('Colección activada');
+  }catch(e){toast('Error al activar colección','err')}
 }
-function crearCol(){
+async function crearCol(){
   const nom=document.getElementById('mc-nom').value.trim();
   const tmp=document.getElementById('mc-tmp').value.trim();
   const fec=document.getElementById('mc-fec').value;
   if(!nom||!tmp||!fec){toast('Completa todos los campos','err');return}
-  DB.colecciones.push({id:Math.max(...DB.colecciones.map(c=>c.id))+1,nombre:nom,temporada:tmp,fecha:fec,estado:'inactiva'});
-  closeM('m-col'); rCol(); toast('Colección creada');
+  try{
+    const res=await fetch('/api/colecciones',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nombre:nom,temporada:tmp,fecha_lanzamiento:fec}),
+    });
+    if(!res.ok){toast('Error al crear colección','err');return}
+    const r=await fetch('/api/colecciones').then(x=>x.json());
+    DB.colecciones=(Array.isArray(r)?r:[]).map(c=>({
+      id:c.id_coleccion,nombre:c.nombre,temporada:c.temporada,fecha:c.fecha_lanzamiento,estado:c.estado,
+    }));
+    closeM('m-col'); buildColFilters(); rCol(); toast('Colección creada');
+  }catch(e){toast('Error al crear colección','err')}
 }
 
 /* ── PRENDAS ───────────────────────────────────────── */
 function rPrendas(){
   let list=DB.prendas;
   if(pfCatV!=='todos') list=list.filter(p=>p.cat===pfCatV);
-  if(pfColV!=='todos') list=list.filter(p=>p.id_col===parseInt(pfColV));
+  if(pfColV!=='todos') list=list.filter(p=>p.id_col===pfColV);
   document.getElementById('t-prendas').innerHTML=list.map(p=>{
     const c=gC(p.id_col);
     return `<tr>
@@ -1148,8 +1228,7 @@ function pfCat(v,btn){
 }
 function pfCol(v,btn){
   pfColV=v;
-  const bs=document.querySelectorAll('#pf-bar .fb');
-  [3,4,5].forEach(i=>{if(bs[i])bs[i].classList.remove('on')});
+  document.querySelectorAll('#pf-bar .fb').forEach((b,i)=>{if(i>=3)b.classList.remove('on')});
   btn.classList.add('on'); rPrendas();
 }
 function popPM(){
@@ -1160,14 +1239,25 @@ function updSub(){
   const subs={ROPA:['Camiseta Oversize','Camiseta Slim fit','Hoodie','Chaqueta','Sudadera','Jean','Short'],ACCESORIOS:['Gorra','Underwear']};
   document.getElementById('mp-sub').innerHTML=(subs[cat]||[]).map(s=>`<option>${s}</option>`).join('');
 }
-function crearPrenda(){
+async function crearPrenda(){
   const nom=document.getElementById('mp-nom').value.trim();
   const cat=document.getElementById('mp-cat').value;
   const sub=document.getElementById('mp-sub').value;
-  const col=parseInt(document.getElementById('mp-col').value);
+  const col=document.getElementById('mp-col').value;
   if(!nom||!cat||!sub){toast('Completa todos los campos','err');return}
-  DB.prendas.push({id:Math.max(...DB.prendas.map(p=>p.id))+1,id_col:col,nombre:nom,cat,sub});
-  closeM('m-prenda'); rPrendas(); toast('Prenda creada');
+  try{
+    const res=await fetch('/api/prendas',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nombre:nom,categoria:cat,subcategoria:sub,id_coleccion:col}),
+    });
+    if(!res.ok){toast('Error al crear prenda','err');return}
+    const r=await fetch('/api/prendas').then(x=>x.json());
+    DB.prendas=(Array.isArray(r)?r:[]).map(p=>({
+      id:p.id_prenda,id_col:p.id_coleccion,nombre:p.nombre,cat:p.categoria,sub:p.subcategoria,
+    }));
+    closeM('m-prenda'); rPrendas(); toast('Prenda creada');
+  }catch(e){toast('Error al crear prenda','err')}
 }
 
 /* ── INVENTARIO ────────────────────────────────────── */
@@ -1175,7 +1265,7 @@ function rInv(){
   let list=[...DB.skus];
   if(invSt==='low') list=list.filter(s=>s.stock>0&&s.stock<=5);
   if(invSt==='ag')  list=list.filter(s=>s.stock===0);
-  if(invCo!=='todos'){const cid=parseInt(invCo);list=list.filter(s=>{const p=gP(s.id_pr);return p&&p.id_col===cid})}
+  if(invCo!=='todos') list=list.filter(s=>{const p=gP(s.id_pr);return p&&p.id_col===invCo});
   document.getElementById('inv-cnt').textContent=`${list.length} refs`;
   document.getElementById('t-inv').innerHTML=list.map(s=>{
     const p=gP(s.id_pr), c=p?gC(p.id_col):null, cls=skCls(s.stock);
@@ -1201,61 +1291,78 @@ function ifSt(v,btn){
 }
 function ifCo(v,btn){
   invCo=v;
-  const bs=document.querySelectorAll('#if-bar .fb');
-  [3,4,5].forEach(i=>{if(bs[i])bs[i].classList.remove('on')});
+  document.querySelectorAll('#if-bar .fb').forEach((b,i)=>{if(i>=3)b.classList.remove('on')});
   btn.classList.add('on'); rInv();
 }
 
 /* ── SOLICITUDES ───────────────────────────────────── */
 function rSol(){
   document.getElementById('t-sol').innerHTML=DB.solicitudes.map(s=>{
-    const pr=gPr(s.id_prov), c=gC(s.id_col);
+    const prNombre=s._prov?.nombre||gPr(s.id_prov)?.nombre||'—';
+    const cNombre=s._col?.nombre||gC(s.id_col)?.nombre||'—';
     return `<tr>
-      <td style="font-family:var(--fm);font-size:10px;color:var(--t3)">#${String(s.id).padStart(3,'0')}</td>
-      <td style="color:var(--t1);font-weight:500">${pr?pr.nombre:'—'}</td>
-      <td style="font-family:var(--fm);font-size:10px">${c?c.nombre.split('—')[0].trim():'—'}</td>
+      <td style="font-family:var(--fm);font-size:10px;color:var(--t3)">#${String(s.id).slice(-6).toUpperCase()}</td>
+      <td style="color:var(--t1);font-weight:500">${prNombre}</td>
+      <td style="font-family:var(--fm);font-size:10px">${cNombre.split('—')[0].trim()}</td>
       <td style="font-family:var(--fm);font-size:10px">${fmtD(s.fecha)}</td>
       <td>${bdg(s.estado)}</td>
-      <td><button class="btn btn-g btn-sm" onclick="verDet(${s.id})">Ver</button></td>
+      <td><button class="btn btn-g btn-sm" onclick="verDet('${s.id}')">Ver</button></td>
     </tr>`;
   }).join('')||`<tr><td colspan="6" class="nd">Sin solicitudes</td></tr>`;
   document.getElementById('sol-det').style.display='none';
 }
-function verDet(id){
+async function verDet(id){
   selSol=id;
   const sol=DB.solicitudes.find(s=>s.id===id);
-  const dets=DB.det_sol.filter(d=>d.id_sol===id);
-  const pr=gPr(sol.id_prov);
+  if(!sol) return;
+  const prNombre=sol._prov?.nombre||gPr(sol.id_prov)?.nombre||'';
   document.getElementById('sol-det').style.display='';
-  document.getElementById('sol-det-ttl').textContent=`SOL-${String(id).padStart(3,'0')} · ${pr?pr.nombre:''}`;
-  const allV=dets.every(d=>d.ver);
+  document.getElementById('sol-det-ttl').textContent=`SOL-${String(id).slice(-6).toUpperCase()} · ${prNombre}`;
+  document.getElementById('t-det').innerHTML=`<tr><td colspan="6" class="nd">Cargando…</td></tr>`;
   const btn=document.getElementById('btn-completo');
-  btn.disabled=!allV||sol.estado==='recibido_completo';
-  btn.textContent=sol.estado==='recibido_completo'?'Completado':allV?'Marcar completo':'Pendiente verificación';
-  document.getElementById('t-det').innerHTML=dets.map(d=>{
-    const sk=gS(d.id_sku), p=sk?gP(sk.id_pr):null;
-    return `<tr>
-      <td style="font-family:var(--fm);font-size:10px;color:var(--t3)">${sk?sk.sku:'—'}</td>
-      <td>${p?p.nombre:'—'}</td>
-      <td><span class="badge b-neu">${sk?sk.talla:'—'}</span></td>
-      <td style="font-family:var(--fm)">${d.sol}</td>
-      <td style="font-family:var(--fm)">${d.rec}</td>
-      <td><button class="chk ${d.ver?'on':''}" onclick="togVer(${d.id})">${d.ver?'✓':''}</button></td>
-    </tr>`;
-  }).join('');
-  document.getElementById('sol-det').scrollIntoView({behavior:'smooth',block:'start'});
+  btn.disabled=true; btn.textContent='Cargando…';
+  try{
+    const dets=await fetch(`/api/solicitudes/${id}`).then(r=>r.json());
+    if(!Array.isArray(dets)) throw new Error('invalid');
+    sol._dets=dets.map(d=>({
+      id:d.id_detalle, id_sol:d.id_solicitud,
+      sol:d.cantidad_solicitada, rec:d.cantidad_recibida,
+      ver:d.estado_verificacion==='recibido_completo',
+      _sku:d.sku,
+    }));
+    const allV=sol._dets.length>0&&sol._dets.every(d=>d.ver);
+    btn.disabled=!allV||sol.estado==='recibido_completo';
+    btn.textContent=sol.estado==='recibido_completo'?'Completado':allV?'Marcar completo':'Pendiente verificación';
+    document.getElementById('t-det').innerHTML=sol._dets.map(d=>{
+      const skCod=d._sku?.codigo_sku||'—';
+      const skTalla=d._sku?.talla||'—';
+      const pNom=d._sku?.prenda?.nombre||'—';
+      return `<tr>
+        <td style="font-family:var(--fm);font-size:10px;color:var(--t3)">${skCod}</td>
+        <td>${pNom}</td>
+        <td><span class="badge b-neu">${skTalla}</span></td>
+        <td style="font-family:var(--fm)">${d.sol}</td>
+        <td style="font-family:var(--fm)">${d.rec}</td>
+        <td><button class="chk ${d.ver?'on':''}" onclick="togVer('${d.id}','${id}')">${d.ver?'✓':''}</button></td>
+      </tr>`;
+    }).join('')||`<tr><td colspan="6" class="nd">Sin detalles</td></tr>`;
+    document.getElementById('sol-det').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){
+    document.getElementById('t-det').innerHTML=`<tr><td colspan="6" class="nd">Error al cargar detalles</td></tr>`;
+    btn.disabled=true; btn.textContent='Error';
+  }
 }
-function togVer(did){
+function togVer(did,solId){
   if(role!=='administrador'){toast('Solo el administrador puede verificar','err');return}
-  const d=DB.det_sol.find(x=>x.id===did);
+  const sol=DB.solicitudes.find(s=>s.id===solId);
+  if(!sol||!sol._dets) return;
+  const d=sol._dets.find(x=>x.id===did);
   if(d){
     d.ver=!d.ver;
-    const sol=DB.solicitudes.find(s=>s.id===selSol);
-    const dets=DB.det_sol.filter(x=>x.id_sol===selSol);
-    if(sol&&sol.estado!=='recibido_completo'){
-      sol.estado=dets.every(x=>x.ver)?'recibido_completo':'recibido_parcial';
-      rSol(); verDet(selSol);
-    } else { verDet(selSol); }
+    if(sol.estado!=='recibido_completo'){
+      sol.estado=sol._dets.every(x=>x.ver)?'recibido_completo':'recibido_parcial';
+      rSol(); verDet(solId);
+    } else { verDet(solId); }
   }
 }
 function marcarCompleto(){
@@ -1266,12 +1373,25 @@ function popSolM(){
   document.getElementById('ms-prov').innerHTML=DB.proveedores.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
   document.getElementById('ms-col').innerHTML=DB.colecciones.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
 }
-function crearSol(){
-  const pid=parseInt(document.getElementById('ms-prov').value);
-  const cid=parseInt(document.getElementById('ms-col').value);
-  const nid=Math.max(...DB.solicitudes.map(s=>s.id))+1;
-  DB.solicitudes.push({id:nid,id_prov:pid,id_col:cid,id_usr:1,fecha:new Date().toISOString().slice(0,10),estado:'pendiente'});
-  closeM('m-sol'); rSol(); toast('Solicitud creada');
+async function crearSol(){
+  const pid=document.getElementById('ms-prov').value;
+  const cid=document.getElementById('ms-col').value;
+  if(!pid||!cid){toast('Selecciona proveedor y colección','err');return}
+  try{
+    const session=parseSession();
+    const res=await fetch('/api/solicitudes',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id_proveedor:pid,id_coleccion:cid,id_usuario:session?.id}),
+    });
+    if(!res.ok){toast('Error al crear solicitud','err');return}
+    const r=await fetch('/api/solicitudes').then(x=>x.json());
+    DB.solicitudes=(Array.isArray(r)?r:[]).map(s=>({
+      id:s.id_solicitud,id_prov:s.id_proveedor,id_col:s.id_coleccion,id_usr:s.id_usuario,
+      fecha:s.fecha_solicitud,estado:s.estado,_prov:s.proveedor,_col:s.coleccion,
+    }));
+    closeM('m-sol'); rSol(); toast('Solicitud creada');
+  }catch(e){toast('Error al crear solicitud','err')}
 }
 
 /* ── SALIDAS ───────────────────────────────────────── */
@@ -1286,50 +1406,73 @@ function rSal(){
   if(prev) skuSel.value=prev;
   document.getElementById('sal-cli').innerHTML=`<option value="">Seleccionar...</option>`+
     DB.clientes.filter(c=>c.estado==='activo').map(c=>`<option value="${c.id}">${c.nombre} — ${c.ciudad}</option>`).join('');
-  document.getElementById('t-sal').innerHTML=[...DB.salidas].reverse().map(s=>{
-    const sk=gS(s.id_sku), p=sk?gP(sk.id_pr):null, cl=gCl(s.id_cli), u=gU(s.id_usr);
+  document.getElementById('t-sal').innerHTML=[...DB.salidas].map(s=>{
+    const skCod=s._sku?.codigo_sku||'—';
+    const skTalla=s._sku?.talla||'—';
+    const pNom=s._sku?.prenda?.nombre||'—';
+    const clNom=s._cli?.nombre||gCl(s.id_cli)?.nombre||'—';
+    const uNom=s._usr?.nombre||gU(s.id_usr)?.nombre||'—';
     return `<tr>
       <td style="font-family:var(--fm);font-size:10px">${fmtD(s.fecha)}</td>
-      <td style="font-family:var(--fm);font-size:10px;color:var(--t3)">${sk?sk.sku:'—'}</td>
-      <td>${p?p.nombre:'—'}</td>
-      <td><span class="badge b-neu">${sk?sk.talla:'—'}</span></td>
-      <td style="color:var(--t1)">${cl?cl.nombre:'—'}</td>
+      <td style="font-family:var(--fm);font-size:10px;color:var(--t3)">${skCod}</td>
+      <td>${pNom}</td>
+      <td><span class="badge b-neu">${skTalla}</span></td>
+      <td style="color:var(--t1)">${clNom}</td>
       <td style="font-family:var(--fm);font-weight:600;color:var(--t1)">${s.cant}</td>
-      <td style="font-size:11px;color:var(--t3)">${u?u.nombre:'—'}</td>
+      <td style="font-size:11px;color:var(--t3)">${uNom}</td>
     </tr>`;
   }).join('')||`<tr><td colspan="7" class="nd">Sin salidas registradas</td></tr>`;
 }
 function salSkuChange(){
-  const sk=gS(parseInt(document.getElementById('sal-sku').value));
+  const sk=gS(document.getElementById('sal-sku').value);
   const info=document.getElementById('sal-stock-info');
   if(sk){
     const col=sk.stock===0?'var(--er)':sk.stock<=5?'var(--wa)':'var(--t2)';
     info.innerHTML='Disponible: <span style="color:'+col+';font-weight:600">'+sk.stock+'</span> unidades';
-  } else { info.textContent='—'; }
+  }else{info.textContent='—';}
   document.getElementById('sal-err').style.display='none';
 }
 function salValidate(){
-  const sk=gS(parseInt(document.getElementById('sal-sku').value));
+  const sk=gS(document.getElementById('sal-sku').value);
   const cant=parseInt(document.getElementById('sal-cant').value);
   document.getElementById('sal-err').style.display=(sk&&cant>sk.stock)?'':'none';
 }
-function regSalida(){
-  const skuId=parseInt(document.getElementById('sal-sku').value);
-  const cliId=parseInt(document.getElementById('sal-cli').value);
+async function regSalida(){
+  const skuId=document.getElementById('sal-sku').value;
+  const cliId=document.getElementById('sal-cli').value;
   const cant=parseInt(document.getElementById('sal-cant').value);
   const obs=document.getElementById('sal-obs').value.trim();
   if(!skuId||!cliId||!cant){toast('Completa los campos requeridos','err');return}
   const sk=gS(skuId);
   if(!sk||cant>sk.stock||cant<=0){toast('Cantidad no válida','err');return}
-  sk.stock-=cant;
-  const nid=DB.salidas.length?Math.max(...DB.salidas.map(s=>s.id))+1:1;
-  DB.salidas.push({id:nid,id_sku:skuId,id_usr:currentUser?currentUser.id:1,id_cli:cliId,cant,fecha:new Date().toISOString().slice(0,10),obs});
-  document.getElementById('sal-sku').value='';
-  document.getElementById('sal-cli').value='';
-  document.getElementById('sal-cant').value='';
-  document.getElementById('sal-obs').value='';
-  document.getElementById('sal-stock-info').textContent='—';
-  rSal(); toast(`Salida registrada · ${cant} uds → ${gCl(cliId)?.nombre||''}`);
+  const session=parseSession();
+  try{
+    const res=await fetch('/api/salidas',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id_sku:skuId,id_usuario:session?.id||currentUser?.id,id_cliente:cliId,cantidad:cant,observacion:obs||null}),
+    });
+    if(!res.ok){toast('Error al registrar salida','err');return}
+    const [sks,sals]=await Promise.all([
+      fetch('/api/sku').then(r=>r.json()),
+      fetch('/api/salidas').then(r=>r.json()),
+    ]);
+    DB.skus=(Array.isArray(sks)?sks:[]).map(s=>({
+      id:s.id_sku,id_pr:s.id_prenda,sku:s.codigo_sku,talla:s.talla,stock:s.stock,ini:s.stock_inicial,
+    }));
+    DB.salidas=(Array.isArray(sals)?sals:[]).map(s=>({
+      id:s.id_salida,id_sku:s.id_sku,id_usr:s.id_usuario,id_cli:s.id_cliente,
+      cant:s.cantidad,fecha:s.fecha_salida,obs:s.observacion||'',
+      _sku:s.sku,_usr:s.usuario,_cli:s.cliente,
+    }));
+    const cli=gCl(cliId);
+    document.getElementById('sal-sku').value='';
+    document.getElementById('sal-cli').value='';
+    document.getElementById('sal-cant').value='';
+    document.getElementById('sal-obs').value='';
+    document.getElementById('sal-stock-info').textContent='—';
+    rSal(); toast(`Salida registrada · ${cant} uds → ${cli?.nombre||''}`);
+  }catch(e){toast('Error al registrar salida','err')}
 }
 
 /* ── ALIADOS ───────────────────────────────────────── */
@@ -1339,37 +1482,58 @@ function rAli(){
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:3px">
         <div class="acard-name">${c.nombre}</div>${bdg(c.estado)}
       </div>
-      <div class="acard-loc">${c.ciudad} · ${c.depto}</div>
-      <div class="acard-row"><span class="acard-lbl">Tel</span><span class="acard-val">${c.tel}</span></div>
-      <div class="acard-row"><span class="acard-lbl">Email</span><span class="acard-val" style="font-family:var(--fm);font-size:10px">${c.email}</span></div>
+      <div class="acard-loc">${c.ciudad||'—'} · ${c.depto||'—'}</div>
+      <div class="acard-row"><span class="acard-lbl">Tel</span><span class="acard-val">${c.tel||'—'}</span></div>
+      <div class="acard-row"><span class="acard-lbl">Email</span><span class="acard-val" style="font-family:var(--fm);font-size:10px">${c.email||'—'}</span></div>
       ${role==='administrador'?`
       <div style="margin-top:10px">
-        <button class="btn btn-g btn-sm" onclick="togAli(${c.id})">${c.estado==='activo'?'Desactivar':'Activar'}</button>
+        <button class="btn btn-g btn-sm" onclick="togAli('${c.id}')">${c.estado==='activo'?'Desactivar':'Activar'}</button>
       </div>`:''}
-    </div>`).join('');
+    </div>`).join('')||`<div style="color:var(--t2);font-size:12px;padding:20px">Sin aliados registrados</div>`;
 }
-function togAli(id){
+async function togAli(id){
   const c=DB.clientes.find(x=>x.id===id);
-  if(c){c.estado=c.estado==='activo'?'inactivo':'activo'; rAli(); toast('Aliado actualizado');}
+  if(!c) return;
+  const nuevoEstado=c.estado==='activo'?'inactivo':'activo';
+  try{
+    const res=await fetch(`/api/clientes/${id}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nombre:c.nombre,ciudad:c.ciudad,departamento:c.depto,telefono:c.tel,email:c.email,estado:nuevoEstado}),
+    });
+    if(!res.ok){toast('Error al actualizar aliado','err');return}
+    c.estado=nuevoEstado;
+    rAli(); toast('Aliado actualizado');
+  }catch(e){toast('Error al actualizar aliado','err')}
 }
-function crearAli(){
+async function crearAli(){
   const nom=document.getElementById('ma-nom').value.trim();
   const ciu=document.getElementById('ma-ciu').value.trim();
   if(!nom||!ciu){toast('Nombre y ciudad requeridos','err');return}
-  DB.clientes.push({
-    id:Math.max(...DB.clientes.map(c=>c.id))+1,
-    nombre:nom,ciudad:ciu,
-    depto:document.getElementById('ma-dep').value.trim(),
-    tel:document.getElementById('ma-tel').value.trim(),
-    email:document.getElementById('ma-ema').value.trim(),
-    estado:'activo',
-  });
-  closeM('m-ali'); rAli(); toast('Aliado creado');
+  try{
+    const res=await fetch('/api/clientes',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        nombre:nom,ciudad:ciu,
+        departamento:document.getElementById('ma-dep').value.trim(),
+        telefono:document.getElementById('ma-tel').value.trim(),
+        email:document.getElementById('ma-ema').value.trim(),
+      }),
+    });
+    if(!res.ok){toast('Error al crear aliado','err');return}
+    const r=await fetch('/api/clientes').then(x=>x.json());
+    DB.clientes=(Array.isArray(r)?r:[]).map(c=>({
+      id:c.id_cliente,nombre:c.nombre,ciudad:c.ciudad,
+      depto:c.departamento,tel:c.telefono,email:c.email,estado:c.estado,
+    }));
+    closeM('m-ali'); rAli(); toast('Aliado creado');
+  }catch(e){toast('Error al crear aliado','err')}
 }
 
 /* ── REPORTES ──────────────────────────────────────── */
 function rRep(){
-  document.getElementById('r-col').innerHTML=DB.colecciones.map(col=>{
+  document.getElementById('r-col').innerHTML=(!DB.colecciones.length?`<div style="color:var(--t2);font-size:12px;padding:20px">Sin colecciones registradas</div>`:'')+DB.colecciones.map(col=>{
     const prs=DB.prendas.filter(p=>p.id_col===col.id);
     const sks=DB.skus.filter(s=>prs.find(p=>p.id===s.id_pr));
     const ini=sks.reduce((a,s)=>a+s.ini,0);
@@ -1416,25 +1580,28 @@ function rRep(){
   }).join('')||`<tr><td colspan="5" class="nd">Sin prendas rezagadas</td></tr>`;
 
   document.getElementById('r-sol').innerHTML=DB.solicitudes.map(s=>{
-    const pr=gPr(s.id_prov), c=gC(s.id_col);
+    const prNombre=s._prov?.nombre||gPr(s.id_prov)?.nombre||'—';
+    const cNombre=s._col?.nombre||gC(s.id_col)?.nombre||'—';
     return `<tr>
-      <td>${pr?pr.nombre:'—'}</td>
-      <td>${c?c.nombre:'—'}</td>
+      <td>${prNombre}</td>
+      <td>${cNombre}</td>
       <td style="font-family:var(--fm);font-size:10px">${fmtD(s.fecha)}</td>
       <td>${bdg(s.estado)}</td>
     </tr>`;
-  }).join('');
+  }).join('')||`<tr><td colspan="4" class="nd">Sin solicitudes</td></tr>`;
 
-  document.getElementById('r-sal').innerHTML=[...DB.salidas].reverse().map(s=>{
-    const sk=gS(s.id_sku), cl=gCl(s.id_cli), u=gU(s.id_usr);
+  document.getElementById('r-sal').innerHTML=[...DB.salidas].map(s=>{
+    const skCod=s._sku?.codigo_sku||'—';
+    const clNom=s._cli?.nombre||gCl(s.id_cli)?.nombre||'—';
+    const uNom=s._usr?.nombre||gU(s.id_usr)?.nombre||'—';
     return `<tr>
       <td style="font-family:var(--fm);font-size:10px">${fmtD(s.fecha)}</td>
-      <td style="font-family:var(--fm);font-size:10px;color:var(--t3)">${sk?sk.sku:'—'}</td>
-      <td>${cl?cl.nombre:'—'}</td>
+      <td style="font-family:var(--fm);font-size:10px;color:var(--t3)">${skCod}</td>
+      <td>${clNom}</td>
       <td style="font-family:var(--fm);font-weight:600">${s.cant}</td>
-      <td style="font-size:11px;color:var(--t3)">${u?u.nombre:'—'}</td>
+      <td style="font-size:11px;color:var(--t3)">${uNom}</td>
     </tr>`;
-  }).join('');
+  }).join('')||`<tr><td colspan="5" class="nd">Sin salidas registradas</td></tr>`;
 }
 
 /* ── INIT ──────────────────────────────────────────── */
