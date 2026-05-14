@@ -957,29 +957,60 @@ document.querySelectorAll('.ov').forEach(el=>{
 });
 
 /* ── AUTH ──────────────────────────────────────────── */
-function doLogin(){
-  const email=document.getElementById('l-email').value.trim();
-  const pass=document.getElementById('l-pass').value;
-  const user=DB.users.find(u=>u.email===email&&u.pass===pass);
-  if(!user){
-    const err=document.getElementById('l-err');
-    err.style.display='block';
-    setTimeout(()=>{err.style.display='none'},2000);
-    return;
-  }
-  currentUser=user;
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('app').style.display='flex';
-  setRole(user.rol);
-  go('dashboard');
+function parseSession(){
+  try{
+    const m=document.cookie.match(/(?:^|;\s*)inv_session=([^;]+)/);
+    return m?JSON.parse(decodeURIComponent(m[1])):null;
+  }catch{return null}
 }
 
-function doLogout(){
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim();
+  const pass=document.getElementById('l-pass').value;
+  const err=document.getElementById('l-err');
+  if(!email||!pass){err.style.display='block';setTimeout(()=>err.style.display='none',2500);return}
+  try{
+    const res=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pass}),
+    });
+    const data=await res.json();
+    if(!res.ok){
+      err.style.display='block';
+      setTimeout(()=>err.style.display='none',2500);
+      return;
+    }
+    const session=parseSession();
+    currentUser={nombre:session?.nombre||email,rol:data.rol};
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').style.display='flex';
+    setRole(data.rol);
+    go('dashboard');
+  }catch{
+    err.style.display='block';
+    setTimeout(()=>err.style.display='none',2500);
+  }
+}
+
+async function doLogout(){
+  await fetch('/api/auth/logout',{method:'POST'});
   document.getElementById('l-email').value='';
   document.getElementById('l-pass').value='';
   currentUser=null;
   document.getElementById('app').style.display='none';
   document.getElementById('login-screen').classList.remove('hidden');
+}
+
+function checkExistingSession(){
+  const session=parseSession();
+  if(session){
+    currentUser={nombre:session.nombre,rol:session.rol};
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').style.display='flex';
+    setRole(session.rol);
+    go('dashboard');
+  }
 }
 
 /* ── ROLE ──────────────────────────────────────────── */
@@ -1405,6 +1436,9 @@ function rRep(){
     </tr>`;
   }).join('');
 }
+
+/* ── INIT ──────────────────────────────────────────── */
+checkExistingSession();
 </script>
 </body>
 </html>
