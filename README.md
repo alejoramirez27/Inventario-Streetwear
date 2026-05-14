@@ -31,7 +31,6 @@ Las tiendas de streetwear manejan múltiples colecciones, referencias (SKUs) por
 | **React 19** | Componentes de interfaz con hooks |
 | **TypeScript** | Tipado estático en todo el proyecto |
 | **CSS-in-JS (inline styles)** | Estilos sin dependencias externas |
-| **Claude (Anthropic)** — IA | Asistente de desarrollo: diseño de UI, componentes, lógica de negocio y resolución de errores |
 
 ### Despliegue
 | Herramienta | Uso |
@@ -96,16 +95,6 @@ Estudiante de Ingeniería — Universidad Tecnológica de Pereira
 GitHub: [@alejoramirez27](https://github.com/alejoramirez27)
 
 ---
-
-## Herramientas de IA utilizadas
-
-Este proyecto fue desarrollado con asistencia de **Claude (Anthropic)**, un modelo de lenguaje avanzado utilizado como copiloto de desarrollo. Claude colaboró en:
-
-- Diseño y maquetación de la interfaz de usuario (UI)
-- Implementación de componentes React y lógica de páginas
-- Diagnóstico y resolución de errores técnicos
-
-
 
 ---
 
