@@ -8,7 +8,6 @@ import { Label }    from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Plus, ChevronDown, ChevronRight, Trash2 } from 'lucide-react'
 
-interface Coleccion { id_coleccion: string; nombre: string; estado: string }
 interface Prenda {
   id_prenda:   string
   id_coleccion: string
@@ -34,15 +33,11 @@ const tallas = {
 
 export default function PrendasPage() {
   const [prendas, setPrendas]         = useState<Prenda[]>([])
-  const [colecciones, setColecciones] = useState<Coleccion[]>([])
   const [loading, setLoading]         = useState(true)
-  const [mostrarForm, setMostrarForm] = useState(false)
-  const [guardando, setGuardando]     = useState(false)
   const [expandida, setExpandida]     = useState<string | null>(null)
   const [skus, setSkus]               = useState<Record<string, SKU[]>>({})
   const [mostrarFormSku, setMostrarFormSku] = useState<string | null>(null)
 
-  const [form, setForm] = useState({ id_coleccion: '', nombre: '', categoria: 'ROPA', subcategoria: '' })
   const [formSku, setFormSku] = useState({ codigo_sku: '', talla: '' })
 
   const cargarPrendas = () => {
@@ -52,7 +47,6 @@ export default function PrendasPage() {
 
   useEffect(() => {
     cargarPrendas()
-    fetch('/api/colecciones').then(r => r.json()).then(setColecciones)
   }, [])
 
   const cargarSkus = (id: string) => {
@@ -62,19 +56,6 @@ export default function PrendasPage() {
   const togglePrenda = (id: string) => {
     if (expandida === id) { setExpandida(null) }
     else { setExpandida(id); if (!skus[id]) cargarSkus(id) }
-  }
-
-  const handleCrearPrenda = async (e: React.FormEvent) => {
-    e.preventDefault(); setGuardando(true)
-    const res  = await fetch('/api/prendas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    const data = await res.json()
-    if (!res.ok) toast.error(data.error ?? 'Error al crear')
-    else {
-      toast.success('Prenda creada correctamente')
-      setForm({ id_coleccion: '', nombre: '', categoria: 'ROPA', subcategoria: '' })
-      setMostrarForm(false); cargarPrendas()
-    }
-    setGuardando(false)
   }
 
   const handleCrearSku = async (e: React.FormEvent, id_prenda: string) => {
@@ -99,67 +80,12 @@ export default function PrendasPage() {
   return (
     <div>
       {/* ── Header ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
-        <div>
-          <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#ffffff' }}>Prendas</h2>
-          <p style={{ fontSize: '12px', color: '#52525b', marginTop: '4px' }}>
-            Registra prendas y sus variantes por talla (SKU)
-          </p>
-        </div>
-        <Button size="sm" onClick={() => setMostrarForm(!mostrarForm)}>
-          <Plus style={{ width: '14px', height: '14px' }} />
-          {mostrarForm ? 'Cancelar' : 'Nueva Prenda'}
-        </Button>
+      <div style={{ marginBottom: '32px' }}>
+        <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#ffffff' }}>Prendas</h2>
+        <p style={{ fontSize: '12px', color: '#52525b', marginTop: '4px' }}>
+          Catálogo de prendas y sus variantes por talla (SKU) — se registran automáticamente al recibir solicitudes
+        </p>
       </div>
-
-      {/* ── Formulario nueva prenda ── */}
-      {mostrarForm && (
-        <div style={{ backgroundColor: '#111113', border: '1px solid #27272a', borderRadius: '12px', padding: '24px', marginBottom: '20px' }}>
-          <p style={{ fontSize: '12px', fontWeight: '600', color: '#ffffff', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Nueva Prenda
-          </p>
-          <form onSubmit={handleCrearPrenda}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <Label>Colección *</Label>
-                <select required value={form.id_coleccion} onChange={e => setForm({ ...form, id_coleccion: e.target.value })} style={selectStyle}>
-                  <option value="">Selecciona colección</option>
-                  {colecciones.map(c => (
-                    <option key={c.id_coleccion} value={c.id_coleccion}>
-                      {c.nombre}{c.estado === 'activa' ? ' ★' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <Label>Nombre *</Label>
-                <Input required value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} placeholder="ej: Hoodie Logo Central" />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <Label>Categoría *</Label>
-                <select value={form.categoria}
-                  onChange={e => setForm({ ...form, categoria: e.target.value as 'ROPA' | 'ACCESORIOS', subcategoria: '' })}
-                  style={selectStyle}>
-                  <option value="ROPA">ROPA</option>
-                  <option value="ACCESORIOS">ACCESORIOS</option>
-                </select>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <Label>Subcategoría *</Label>
-                <select required value={form.subcategoria} onChange={e => setForm({ ...form, subcategoria: e.target.value })} style={selectStyle}>
-                  <option value="">Selecciona subcategoría</option>
-                  {subcategorias[form.categoria as 'ROPA' | 'ACCESORIOS'].map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <Button type="submit" disabled={guardando} size="sm">
-              {guardando ? 'Guardando…' : 'Crear Prenda'}
-            </Button>
-          </form>
-        </div>
-      )}
 
       {/* ── Lista de prendas ── */}
       <div style={{ backgroundColor: '#111113', border: '1px solid #27272a', borderRadius: '12px', overflow: 'hidden' }}>
