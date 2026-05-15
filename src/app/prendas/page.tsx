@@ -3,10 +3,8 @@ import { useEffect, useState } from 'react'
 import { toast }    from 'sonner'
 import { Button }   from '@/components/ui/button'
 import { Badge }    from '@/components/ui/badge'
-import { Input }    from '@/components/ui/input'
-import { Label }    from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Plus, ChevronDown, ChevronRight, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react'
 
 interface Prenda {
   id_prenda:   string
@@ -22,24 +20,11 @@ interface SKU {
   stock: number; stock_inicial: number
 }
 
-const subcategorias = {
-  ROPA:       ['Camiseta Oversize', 'Camiseta Slim Fit', 'Hoodie', 'Chaqueta', 'Sudadera', 'Jean', 'Short'],
-  ACCESORIOS: ['Gorra', 'Underwear'],
-}
-const tallas = {
-  ROPA:       ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-  ACCESORIOS: ['Única', 'S/M', 'M/L', 'L/XL'],
-}
-
 export default function PrendasPage() {
   const [prendas, setPrendas]         = useState<Prenda[]>([])
   const [loading, setLoading]         = useState(true)
   const [expandida, setExpandida]     = useState<string | null>(null)
   const [skus, setSkus]               = useState<Record<string, SKU[]>>({})
-  const [mostrarFormSku, setMostrarFormSku] = useState<string | null>(null)
-
-  const [formSku, setFormSku] = useState({ codigo_sku: '', talla: '' })
-
   const cargarPrendas = () => {
     setLoading(true)
     fetch('/api/prendas').then(r => r.json()).then(d => { setPrendas(d); setLoading(false) })
@@ -56,17 +41,6 @@ export default function PrendasPage() {
   const togglePrenda = (id: string) => {
     if (expandida === id) { setExpandida(null) }
     else { setExpandida(id); if (!skus[id]) cargarSkus(id) }
-  }
-
-  const handleCrearSku = async (e: React.FormEvent, id_prenda: string) => {
-    e.preventDefault()
-    const res  = await fetch('/api/sku', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...formSku, id_prenda }) })
-    const data = await res.json()
-    if (!res.ok) toast.error(data.error ?? 'Error al agregar SKU')
-    else {
-      toast.success('SKU agregado correctamente')
-      setFormSku({ codigo_sku: '', talla: '' }); setMostrarFormSku(null); cargarSkus(id_prenda)
-    }
   }
 
   const handleEliminar = async (prenda: Prenda) => {
@@ -151,41 +125,15 @@ export default function PrendasPage() {
               {/* ── SKUs expandidos ── */}
               {expandida === prenda.id_prenda && (
                 <div style={{ backgroundColor: '#0d0d0f', borderBottom: '1px solid #27272a', padding: '18px 32px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                    <p style={{ fontSize: '10px', color: '#3f3f46', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                      Variantes por talla (SKU)
-                    </p>
-                    <Button variant="outline" size="sm"
-                      onClick={() => setMostrarFormSku(mostrarFormSku === prenda.id_prenda ? null : prenda.id_prenda)}>
-                      <Plus style={{ width: '12px', height: '12px' }} />
-                      Agregar SKU
-                    </Button>
-                  </div>
-
-                  {/* Form nuevo SKU */}
-                  {mostrarFormSku === prenda.id_prenda && (
-                    <form onSubmit={e => handleCrearSku(e, prenda.id_prenda)}
-                      style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', marginBottom: '14px', backgroundColor: '#111113', padding: '14px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <Label>Código SKU *</Label>
-                        <Input required value={formSku.codigo_sku} onChange={e => setFormSku({ ...formSku, codigo_sku: e.target.value })} placeholder="ej: HOD-BLK-M" />
-                      </div>
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <Label>Talla *</Label>
-                        <select required value={formSku.talla} onChange={e => setFormSku({ ...formSku, talla: e.target.value })} style={selectStyle}>
-                          <option value="">Selecciona talla</option>
-                          {tallas[prenda.categoria].map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                      </div>
-                      <Button type="submit" size="sm">Agregar</Button>
-                    </form>
-                  )}
+                  <p style={{ fontSize: '10px', color: '#3f3f46', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '14px' }}>
+                    Variantes por talla (SKU)
+                  </p>
 
                   {/* Tabla SKUs */}
                   {!skus[prenda.id_prenda] ? (
                     <p style={{ color: '#3f3f46', fontSize: '12px' }}>Cargando SKUs…</p>
                   ) : skus[prenda.id_prenda].length === 0 ? (
-                    <p style={{ color: '#3f3f46', fontSize: '12px' }}>No hay SKUs — agrega la primera talla</p>
+                    <p style={{ color: '#3f3f46', fontSize: '12px' }}>Sin SKUs — se registrarán al recibir la solicitud del proveedor</p>
                   ) : (
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
@@ -227,9 +175,3 @@ const thStyle: React.CSSProperties = {
   textTransform: 'uppercase', letterSpacing: '1.5px',
 }
 
-const selectStyle: React.CSSProperties = {
-  width: '100%', height: '36px',
-  backgroundColor: '#18181b', border: '1px solid #27272a',
-  borderRadius: '6px', padding: '0 12px',
-  fontSize: '13px', color: '#e4e4e7', outline: 'none',
-}
