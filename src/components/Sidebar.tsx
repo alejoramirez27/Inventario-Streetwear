@@ -11,6 +11,7 @@ import {
   ArrowUpTrayIcon,
   UsersIcon,
   PresentationChartBarIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/solid'
 import { MagnifyingGlassIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline'
 
@@ -47,6 +48,12 @@ const groups = [
     items: [
       { href: '/clientes', label: 'Aliados',   Icon: UsersIcon,                roles: ['administrador', 'bodeguero'] },
       { href: '/reportes', label: 'Reportes',  Icon: PresentationChartBarIcon, roles: ['administrador', 'bodeguero'] },
+    ],
+  },
+  {
+    label: 'Administración',
+    items: [
+      { href: '/usuarios', label: 'Usuarios',  Icon: UserGroupIcon,            roles: ['administrador'] },
     ],
   },
 ]
