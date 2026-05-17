@@ -4,15 +4,16 @@ import { toast }    from 'sonner'
 import { Button }   from '@/components/ui/button'
 import { Badge }    from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 
 interface Prenda {
-  id_prenda:   string
+  id_prenda:    string
   id_coleccion: string
-  nombre:      string
-  categoria:   'ROPA' | 'ACCESORIOS'
+  nombre:       string
+  categoria:    'ROPA' | 'ACCESORIOS'
   subcategoria: string
-  coleccion:   { nombre: string; estado: string }
+  estado:       'activa' | 'inactiva'
+  coleccion:    { nombre: string; estado: string }
 }
 interface SKU {
   id_sku: string; id_prenda: string
@@ -43,12 +44,21 @@ export default function PrendasPage() {
     else { setExpandida(id); if (!skus[id]) cargarSkus(id) }
   }
 
-  const handleEliminar = async (prenda: Prenda) => {
-    if (!confirm(`¿Eliminar "${prenda.nombre}"?`)) return
-    const res  = await fetch(`/api/prendas/${prenda.id_prenda}`, { method: 'DELETE' })
+  const toggleEstado = async (prenda: Prenda) => {
+    const nuevoEstado = prenda.estado === 'activa' ? 'inactiva' : 'activa'
+    const res  = await fetch(`/api/prendas/${prenda.id_prenda}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: nuevoEstado }),
+    })
     const data = await res.json()
-    if (!res.ok) toast.error(data.error ?? 'Error al eliminar')
-    else { toast.success('Prenda eliminada'); cargarPrendas() }
+    if (!res.ok) toast.error(data.error ?? 'Error al cambiar estado')
+    else {
+      toast.success(nuevoEstado === 'activa'
+        ? `"${prenda.nombre}" activada`
+        : `"${prenda.nombre}" desactivada`)
+      cargarPrendas()
+    }
   }
 
   return (
@@ -90,6 +100,7 @@ export default function PrendasPage() {
                   borderBottom: '1px solid #1c1c1f', cursor: 'pointer',
                   backgroundColor: expandida === prenda.id_prenda ? '#18181b' : 'transparent',
                   transition: 'background-color 0.1s',
+                  opacity: prenda.estado === 'inactiva' ? 0.45 : 1,
                 }}
                 onMouseEnter={e => { if (expandida !== prenda.id_prenda) e.currentTarget.style.backgroundColor = '#16161a' }}
                 onMouseLeave={e => { if (expandida !== prenda.id_prenda) e.currentTarget.style.backgroundColor = 'transparent' }}
@@ -116,8 +127,12 @@ export default function PrendasPage() {
                 </Badge>
                 {/* Acción */}
                 <div onClick={e => e.stopPropagation()}>
-                  <Button variant="destructive" size="icon-sm" onClick={() => handleEliminar(prenda)}>
-                    <Trash2 style={{ width: '12px', height: '12px' }} />
+                  <Button
+                    variant={prenda.estado === 'activa' ? 'destructive' : 'outline'}
+                    size="sm"
+                    onClick={() => toggleEstado(prenda)}
+                  >
+                    {prenda.estado === 'activa' ? 'Desactivar' : 'Activar'}
                   </Button>
                 </div>
               </div>

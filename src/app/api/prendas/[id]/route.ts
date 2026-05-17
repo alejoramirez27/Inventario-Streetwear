@@ -1,32 +1,22 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
-export async function DELETE(
+// PATCH /api/prendas/:id → cambiar estado (activa / inactiva)
+export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }  // ← ahora es Promise
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createServiceClient()
-  const { id } = await params  // ← hay que hacer await
+  const { id }   = await params
+  const body     = await request.json()
 
-  // Primero eliminar los SKUs asociados (FK constraint)
-  const { error: errSku } = await supabase
-    .from('sku')
-    .delete()
-    .eq('id_prenda', id)
-
-  if (errSku) {
-    return NextResponse.json({ error: errSku.message }, { status: 400 })
-  }
-
-  // Luego eliminar la prenda
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('prenda')
-    .delete()
+    .update({ estado: body.estado })
     .eq('id_prenda', id)
+    .select()
+    .single()
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
-  }
-
-  return NextResponse.json({ message: 'Prenda eliminada correctamente' })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  return NextResponse.json(data)
 }
