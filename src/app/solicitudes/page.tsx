@@ -33,9 +33,12 @@ const subcategorias = {
   ROPA:       ['Camiseta Oversize', 'Camiseta Slim Fit', 'Hoodie', 'Chaqueta', 'Sudadera', 'Jean', 'Short'],
   ACCESORIOS: ['Gorra', 'Underwear'],
 }
-const tallas = {
-  ROPA:       ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-  ACCESORIOS: ['Única', 'S/M', 'M/L', 'L/XL'],
+
+// Tallas según subcategoría: Gorra siempre es Única
+function getTallas(categoria: string, subcategoria: string): string[] {
+  if (subcategoria === 'Gorra') return ['Única']
+  if (categoria === 'ACCESORIOS') return ['Única', 'S/M', 'M/L', 'L/XL']
+  return ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 }
 
 function estadoVariant(e: string) {
@@ -90,10 +93,16 @@ export default function SolicitudesPage() {
   const cargarSelects = () => {
     fetch('/api/proveedores').then(r => r.json()).then(d =>
       setProveedores(d.map((p: any) => ({ id: p.id_proveedor, nombre: p.nombre }))))
+    // Solo colecciones activas (la campaña en curso)
     fetch('/api/colecciones').then(r => r.json()).then(d =>
-      setColecciones(d.map((c: any) => ({ id: c.id_coleccion, nombre: c.nombre, extra: c.estado }))))
+      setColecciones(d
+        .filter((c: any) => c.estado === 'activa')
+        .map((c: any) => ({ id: c.id_coleccion, nombre: c.nombre }))))
+    // Solo administradores activos (bodeguero no tiene acceso a solicitudes)
     fetch('/api/usuarios').then(r => r.json()).then(d =>
-      setUsuarios(d.map((u: any) => ({ id: u.id_usuario, nombre: `${u.nombre} (${u.rol})` }))))
+      setUsuarios(d
+        .filter((u: any) => u.rol === 'administrador' && u.estado === 'activo')
+        .map((u: any) => ({ id: u.id_usuario, nombre: u.nombre }))))
   }
 
   useEffect(() => { cargarSolicitudes(); cargarSelects() }, [])
@@ -146,14 +155,23 @@ export default function SolicitudesPage() {
   }
 
   const handleRegistrarRecibido = async (det: Detalle) => {
+    const incremento = Number(cantidadRecibida)
+    if (!incremento || incremento <= 0) {
+      toast.error('Ingresa una cantidad mayor a 0')
+      return
+    }
     const res  = await fetch(`/api/detalles/${det.id_detalle}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cantidad_recibida: Number(cantidadRecibida) }),
+      body: JSON.stringify({ incremento }),
     })
     const data = await res.json()
     if (!res.ok) toast.error(data.error ?? 'Error al registrar')
     else {
-      toast.success('Cantidad registrada — stock actualizado en bodega')
+      const nuevo = det.cantidad_recibida + incremento
+      const completo = nuevo >= det.cantidad_solicitada
+      toast.success(completo
+        ? `Recepción completa — ${nuevo} de ${det.cantidad_solicitada} unidades`
+        : `${incremento} unidades registradas — quedan ${det.cantidad_solicitada - nuevo} pendientes`)
       setEditandoCantidad(null); setCantidadRecibida('')
       cargarDetalles(det.id_solicitud); cargarSolicitudes()
     }
@@ -369,7 +387,12 @@ export default function SolicitudesPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <Label>Subcategoría *</Label>
                           <select required value={formDetalle.subcategoria}
-                            onChange={e => setFormDetalle({ ...formDetalle, subcategoria: e.target.value })}
+                            onChange={e => {
+                              const sub = e.target.value
+                              // Gorra siempre tiene talla Única — auto-seleccionar
+                              const talla = sub === 'Gorra' ? 'Única' : ''
+                              setFormDetalle({ ...formDetalle, subcategoria: sub, talla })
+                            }}
                             style={selectStyle}>
                             <option value="">Selecciona</option>
                             {subcategorias[formDetalle.categoria as 'ROPA' | 'ACCESORIOS'].map(s => (
@@ -393,9 +416,10 @@ export default function SolicitudesPage() {
                           <Label>Talla *</Label>
                           <select required value={formDetalle.talla}
                             onChange={e => setFormDetalle({ ...formDetalle, talla: e.target.value })}
-                            style={selectStyle}>
+                            style={selectStyle}
+                            disabled={formDetalle.subcategoria === 'Gorra'}>
                             <option value="">Selecciona</option>
-                            {tallas[formDetalle.categoria as 'ROPA' | 'ACCESORIOS'].map(t => (
+                            {getTallas(formDetalle.categoria, formDetalle.subcategoria).map(t => (
                               <option key={t} value={t}>{t}</option>
                             ))}
                           </select>
@@ -460,7 +484,7 @@ export default function SolicitudesPage() {
                                 editandoCantidad === det.id_detalle ? (
                                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                     <Input
-                                      type="number" min="0"
+                                      type="number" min="1"
                                       value={cantidadRecibida}
                                       onChange={e => setCantidadRecibida(e.target.value)}
                                       placeholder="Cant."
@@ -473,7 +497,7 @@ export default function SolicitudesPage() {
                                   <Button variant="outline" size="sm"
                                     onClick={() => {
                                       setEditandoCantidad(det.id_detalle)
-                                      setCantidadRecibida(String(det.cantidad_recibida))
+                                      setCantidadRecibida('')
                                     }}
                                     style={{ fontSize: '11px', color: '#c8922a', borderColor: '#78350f' }}>
                                     Registrar llegada
