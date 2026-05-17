@@ -2,4 +2,12 @@
 .next/
 .env.local
 .env
+.env*.local
 desktop.ini
+
+# Archivos generados automáticamente
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Archivos internos de herramientas
+SKILL.md
