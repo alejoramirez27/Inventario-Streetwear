@@ -4,11 +4,12 @@ import { createServiceClient } from '@/lib/supabase/server'
 export async function GET() {
   const supabase = createServiceClient()
 
-  // 1. Stock actual por colección activa
+  // 1. Stock actual por colección activa y prenda activa
   const { data: stockActual } = await supabase
     .from('stock_actual')
     .select('*')
     .eq('estado_coleccion', 'activa')
+    .eq('estado_prenda', 'activa')
     .order('stock', { ascending: false })
 
   // 2. Prendas rezagadas (colecciones inactivas con stock > 0)
