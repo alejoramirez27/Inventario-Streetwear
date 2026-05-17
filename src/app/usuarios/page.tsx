@@ -89,8 +89,9 @@ export default function UsuariosPage() {
     }
   }
 
-  const activos   = usuarios.filter(u => u.estado === 'activo').length
-  const admins    = usuarios.filter(u => u.rol === 'administrador').length
+  const activos    = usuarios.filter(u => u.estado === 'activo').length
+  const admins     = usuarios.filter(u => u.rol === 'administrador').length
+  const bodegueros = usuarios.filter(u => u.rol === 'bodeguero').length
 
   return (
     <div>
@@ -109,11 +110,12 @@ export default function UsuariosPage() {
       </div>
 
       {/* ── Métricas ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
         {[
-          { label: 'Total usuarios',   value: usuarios.length, color: '#ffffff' },
-          { label: 'Activos',          value: activos,          color: '#22c55e' },
-          { label: 'Administradores',  value: admins,           color: '#a1a1aa' },
+          { label: 'Total usuarios',  value: usuarios.length, color: '#ffffff' },
+          { label: 'Activos',         value: activos,          color: '#22c55e' },
+          { label: 'Administradores', value: admins,           color: '#a1a1aa' },
+          { label: 'Bodegueros',      value: bodegueros,       color: '#a1a1aa' },
         ].map(m => (
           <div key={m.label} style={{ backgroundColor: '#111113', border: '1px solid #27272a', borderRadius: '12px', padding: '16px 18px' }}>
             <p style={{ fontSize: '10px', color: '#52525b', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>{m.label}</p>
