@@ -40,6 +40,7 @@ export default function ClientesPage() {
   useEffect(() => { cargar() }, [])
 
   const abrirNuevo = () => {
+    if (mostrarForm && !editando) { setMostrarForm(false); return }
     setEditando(null); setForm(formVacio); setMostrarForm(true)
   }
 
@@ -95,9 +96,9 @@ export default function ClientesPage() {
             Tiendas aliadas — trazabilidad de despachos
           </p>
         </div>
-        <Button size="sm" onClick={abrirNuevo}>
+        <Button size="sm" onClick={abrirNuevo} variant={mostrarForm && !editando ? 'secondary' : 'default'}>
           <Plus style={{ width: '14px', height: '14px' }} />
-          Nuevo Aliado
+          {mostrarForm && !editando ? 'Cancelar' : 'Nuevo Aliado'}
         </Button>
       </div>
 

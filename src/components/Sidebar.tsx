@@ -98,7 +98,10 @@ export default function Sidebar() {
     }}>
 
       {/* Marca */}
-      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid #27272a' }}>
+      <Link href="/" style={{ textDecoration: 'none', display: 'block', padding: '24px 20px 20px', borderBottom: '1px solid #27272a', cursor: 'pointer' }}
+        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#18181b')}
+        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+      >
         <p style={{ fontSize: '9px', color: '#3f3f46', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '4px' }}>
           Sistema de
         </p>
@@ -108,7 +111,7 @@ export default function Sidebar() {
         <p style={{ fontSize: '9px', color: '#3f3f46', letterSpacing: '3px', textTransform: 'uppercase', marginTop: '4px' }}>
           Streetwear
         </p>
-      </div>
+      </Link>
 
       {/* Búsqueda */}
       <div style={{ padding: '12px 14px', borderBottom: '1px solid #1c1c1f' }}>
