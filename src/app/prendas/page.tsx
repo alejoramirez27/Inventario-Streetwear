@@ -89,8 +89,8 @@ export default function PrendasPage() {
           }}>
             <span />
             <span style={colHeaderStyle}>Prenda</span>
-            <span style={colHeaderStyle}>Categoría</span>
-            <span style={colHeaderStyle}>Colección</span>
+            <span style={{ ...colHeaderStyle, textAlign: 'center' }}>Categoría</span>
+            <span style={{ ...colHeaderStyle, textAlign: 'center' }}>Colección</span>
             <span style={{ ...colHeaderStyle, textAlign: 'center' }}>Estado colección</span>
             <span style={{ ...colHeaderStyle, textAlign: 'center' }}>Estado prenda</span>
           </div>
@@ -134,15 +134,19 @@ export default function PrendasPage() {
                   <p style={{ fontSize: '11px', color: '#52525b', marginTop: '2px' }}>{prenda.subcategoria}</p>
                 </div>
                 {/* Categoría */}
-                <Badge variant="secondary">{prenda.categoria}</Badge>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Badge variant="secondary">{prenda.categoria}</Badge>
+                </div>
                 {/* Colección */}
-                <p style={{ fontSize: '12px', color: '#71717a' }}>{prenda.coleccion?.nombre ?? '—'}</p>
+                <p style={{ fontSize: '12px', color: '#71717a', textAlign: 'center' }}>{prenda.coleccion?.nombre ?? '—'}</p>
                 {/* Estado colección */}
-                <Badge variant={prenda.coleccion?.estado === 'activa' ? 'success' : 'secondary'}>
-                  {prenda.coleccion?.estado?.toUpperCase() ?? '—'}
-                </Badge>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Badge variant={prenda.coleccion?.estado === 'activa' ? 'success' : 'secondary'}>
+                    {prenda.coleccion?.estado?.toUpperCase() ?? '—'}
+                  </Badge>
+                </div>
                 {/* Acción */}
-                <div onClick={e => e.stopPropagation()}>
+                <div onClick={e => e.stopPropagation()} style={{ display: 'flex', justifyContent: 'center' }}>
                   <Button
                     variant={prenda.estado === 'activa' ? 'destructive' : 'outline'}
                     size="sm"
