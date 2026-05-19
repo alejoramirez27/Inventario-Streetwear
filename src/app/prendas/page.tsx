@@ -22,18 +22,17 @@ interface SKU {
 }
 
 export default function PrendasPage() {
-  const [prendas, setPrendas]         = useState<Prenda[]>([])
-  const [loading, setLoading]         = useState(true)
-  const [expandida, setExpandida]     = useState<string | null>(null)
-  const [skus, setSkus]               = useState<Record<string, SKU[]>>({})
+  const [prendas, setPrendas]     = useState<Prenda[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [expandida, setExpandida] = useState<string | null>(null)
+  const [skus, setSkus]           = useState<Record<string, SKU[]>>({})
+
   const cargarPrendas = () => {
     setLoading(true)
     fetch('/api/prendas').then(r => r.json()).then(d => { setPrendas(d); setLoading(false) })
   }
 
-  useEffect(() => {
-    cargarPrendas()
-  }, [])
+  useEffect(() => { cargarPrendas() }, [])
 
   const cargarSkus = (id: string) => {
     fetch(`/api/sku?id_prenda=${id}`).then(r => r.json()).then(d => setSkus(p => ({ ...p, [id]: d })))
@@ -71,7 +70,7 @@ export default function PrendasPage() {
         </p>
       </div>
 
-      {/* ── Lista de prendas ── */}
+      {/* ── Tabla ── */}
       <div style={{ backgroundColor: '#111113', border: '1px solid #27272a', borderRadius: '12px', overflow: 'hidden' }}>
         <div style={{ padding: '16px 22px', borderBottom: '1px solid #27272a' }}>
           <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff' }}>
@@ -80,138 +79,143 @@ export default function PrendasPage() {
           </h3>
         </div>
 
-        {/* ── Cabeceras de columnas ── */}
-        {!loading && prendas.length > 0 && (
-          <div style={{
-            display: 'grid', gridTemplateColumns: '28px 2fr auto 1fr auto auto',
-            alignItems: 'center', gap: '12px', padding: '8px 22px',
-            borderBottom: '1px solid #27272a',
-          }}>
-            <span />
-            <span style={colHeaderStyle}>Prenda</span>
-            <span style={{ ...colHeaderStyle, textAlign: 'center' }}>Categoría</span>
-            <span style={{ ...colHeaderStyle, textAlign: 'center' }}>Colección</span>
-            <span style={{ ...colHeaderStyle, textAlign: 'center' }}>Estado colección</span>
-            <span style={{ ...colHeaderStyle, textAlign: 'center' }}>Estado prenda</span>
-          </div>
-        )}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #1c1c1f' }}>
+                {['', 'Prenda', 'Categoría', 'Colección', 'Estado colección', 'Estado prenda'].map(h => (
+                  <th key={h} style={thStyle}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading && Array.from({ length: 4 }).map((_, i) => (
+                <tr key={i}>
+                  <td colSpan={6} style={{ padding: '10px 22px' }}>
+                    <Skeleton style={{ height: '14px', borderRadius: '4px' }} />
+                  </td>
+                </tr>
+              ))}
 
-        {loading ? (
-          <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} style={{ height: '56px', borderRadius: '6px' }} />)}
-          </div>
-        ) : prendas.length === 0 ? (
-          <div style={{ padding: '48px', textAlign: 'center', color: '#3f3f46', fontSize: '13px' }}>
-            No hay prendas registradas
-          </div>
-        ) : (
-          prendas.map(prenda => (
-            <div key={prenda.id_prenda}>
-              {/* ── Fila prenda ── */}
-              <div
-                onClick={() => togglePrenda(prenda.id_prenda)}
-                style={{
-                  display: 'grid', gridTemplateColumns: '28px 2fr auto 1fr auto auto',
-                  alignItems: 'center', gap: '12px', padding: '14px 22px',
-                  borderBottom: '1px solid #1c1c1f', cursor: 'pointer',
-                  backgroundColor: expandida === prenda.id_prenda ? '#18181b' : 'transparent',
-                  transition: 'background-color 0.1s',
-                  opacity: prenda.estado === 'inactiva' ? 0.45 : 1,
-                }}
-                onMouseEnter={e => { if (expandida !== prenda.id_prenda) e.currentTarget.style.backgroundColor = '#16161a' }}
-                onMouseLeave={e => { if (expandida !== prenda.id_prenda) e.currentTarget.style.backgroundColor = 'transparent' }}
-              >
-                {/* Chevron */}
-                <span style={{ color: '#3f3f46' }}>
-                  {expandida === prenda.id_prenda
-                    ? <ChevronDown style={{ width: '14px', height: '14px' }} />
-                    : <ChevronRight style={{ width: '14px', height: '14px' }} />
-                  }
-                </span>
-                {/* Nombre */}
-                <div>
-                  <p style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff' }}>{prenda.nombre}</p>
-                  <p style={{ fontSize: '11px', color: '#52525b', marginTop: '2px' }}>{prenda.subcategoria}</p>
-                </div>
-                {/* Categoría */}
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <Badge variant="secondary">{prenda.categoria}</Badge>
-                </div>
-                {/* Colección */}
-                <p style={{ fontSize: '12px', color: '#71717a', textAlign: 'center' }}>{prenda.coleccion?.nombre ?? '—'}</p>
-                {/* Estado colección */}
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <Badge variant={prenda.coleccion?.estado === 'activa' ? 'success' : 'secondary'}>
-                    {prenda.coleccion?.estado?.toUpperCase() ?? '—'}
-                  </Badge>
-                </div>
-                {/* Acción */}
-                <div onClick={e => e.stopPropagation()} style={{ display: 'flex', justifyContent: 'center' }}>
-                  <Button
-                    variant={prenda.estado === 'activa' ? 'destructive' : 'outline'}
-                    size="sm"
-                    onClick={() => toggleEstado(prenda)}
-                  >
-                    {prenda.estado === 'activa' ? 'Desactivar' : 'Activar'}
-                  </Button>
-                </div>
-              </div>
-
-              {/* ── SKUs expandidos ── */}
-              {expandida === prenda.id_prenda && (
-                <div style={{ backgroundColor: '#0d0d0f', borderBottom: '1px solid #27272a', padding: '18px 32px' }}>
-                  <p style={{ fontSize: '10px', color: '#3f3f46', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '14px' }}>
-                    Variantes por talla (SKU)
-                  </p>
-
-                  {/* Tabla SKUs */}
-                  {!skus[prenda.id_prenda] ? (
-                    <p style={{ color: '#3f3f46', fontSize: '12px' }}>Cargando SKUs…</p>
-                  ) : skus[prenda.id_prenda].length === 0 ? (
-                    <p style={{ color: '#3f3f46', fontSize: '12px' }}>Sin SKUs — se registrarán al recibir la solicitud del proveedor</p>
-                  ) : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid #1c1c1f' }}>
-                          {['Código SKU', 'Talla', 'Stock actual', 'Stock inicial'].map(h => (
-                            <th key={h} style={thStyle}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {skus[prenda.id_prenda].map(sku => (
-                          <tr key={sku.id_sku} style={{ borderBottom: '1px solid #1c1c1f' }}>
-                            <td style={{ padding: '10px 16px', fontSize: '11px', color: '#52525b', fontFamily: 'var(--font-mono)' }}>{sku.codigo_sku}</td>
-                            <td style={{ padding: '10px 16px', fontSize: '13px', fontWeight: '600', color: '#ffffff' }}>{sku.talla}</td>
-                            <td style={{ padding: '10px 16px' }}>
-                              <span style={{ fontSize: '15px', fontWeight: '700', fontFamily: 'var(--font-mono)', color: sku.stock <= 5 ? '#b84444' : '#22c55e' }}>
-                                {sku.stock}
-                              </span>
-                            </td>
-                            <td style={{ padding: '10px 16px', fontSize: '12px', color: '#52525b', fontFamily: 'var(--font-mono)' }}>{sku.stock_inicial}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+              {!loading && prendas.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ padding: '48px', textAlign: 'center', color: '#3f3f46', fontSize: '13px' }}>
+                    No hay prendas registradas
+                  </td>
+                </tr>
               )}
-            </div>
-          ))
-        )}
+
+              {!loading && prendas.map(prenda => (
+                <>
+                  {/* ── Fila prenda ── */}
+                  <tr
+                    key={prenda.id_prenda}
+                    onClick={() => togglePrenda(prenda.id_prenda)}
+                    style={{
+                      borderBottom: expandida === prenda.id_prenda ? 'none' : '1px solid #1c1c1f',
+                      cursor: 'pointer',
+                      backgroundColor: expandida === prenda.id_prenda ? '#18181b' : 'transparent',
+                      opacity: prenda.estado === 'inactiva' ? 0.45 : 1,
+                      transition: 'background-color 0.1s',
+                    }}
+                    onMouseEnter={e => { if (expandida !== prenda.id_prenda) e.currentTarget.style.backgroundColor = '#16161a' }}
+                    onMouseLeave={e => { if (expandida !== prenda.id_prenda) e.currentTarget.style.backgroundColor = expandida === prenda.id_prenda ? '#18181b' : 'transparent' }}
+                  >
+                    {/* Chevron */}
+                    <td style={{ padding: '13px 0 13px 22px', width: '36px', color: '#3f3f46' }}>
+                      {expandida === prenda.id_prenda
+                        ? <ChevronDown style={{ width: '14px', height: '14px' }} />
+                        : <ChevronRight style={{ width: '14px', height: '14px' }} />
+                      }
+                    </td>
+                    {/* Nombre */}
+                    <td style={{ padding: '13px 22px' }}>
+                      <p style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff' }}>{prenda.nombre}</p>
+                      <p style={{ fontSize: '11px', color: '#52525b', marginTop: '2px' }}>{prenda.subcategoria}</p>
+                    </td>
+                    {/* Categoría */}
+                    <td style={{ padding: '13px 22px' }}>
+                      <Badge variant="secondary">{prenda.categoria}</Badge>
+                    </td>
+                    {/* Colección */}
+                    <td style={{ padding: '13px 22px', fontSize: '12px', color: '#71717a' }}>
+                      {prenda.coleccion?.nombre ?? '—'}
+                    </td>
+                    {/* Estado colección */}
+                    <td style={{ padding: '13px 22px' }}>
+                      <Badge variant={prenda.coleccion?.estado === 'activa' ? 'success' : 'secondary'}>
+                        {prenda.coleccion?.estado?.toUpperCase() ?? '—'}
+                      </Badge>
+                    </td>
+                    {/* Estado prenda */}
+                    <td style={{ padding: '13px 22px' }} onClick={e => e.stopPropagation()}>
+                      <Button
+                        variant={prenda.estado === 'activa' ? 'destructive' : 'outline'}
+                        size="sm"
+                        onClick={() => toggleEstado(prenda)}
+                      >
+                        {prenda.estado === 'activa' ? 'Desactivar' : 'Activar'}
+                      </Button>
+                    </td>
+                  </tr>
+
+                  {/* ── SKUs expandidos ── */}
+                  {expandida === prenda.id_prenda && (
+                    <tr key={`${prenda.id_prenda}-skus`}>
+                      <td colSpan={6} style={{ backgroundColor: '#0d0d0f', borderBottom: '1px solid #27272a', padding: '0' }}>
+                        <div style={{ padding: '16px 48px 20px' }}>
+                          <p style={{ fontSize: '10px', color: '#3f3f46', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>
+                            Variantes por talla (SKU)
+                          </p>
+                          {!skus[prenda.id_prenda] ? (
+                            <p style={{ color: '#3f3f46', fontSize: '12px' }}>Cargando SKUs…</p>
+                          ) : skus[prenda.id_prenda].length === 0 ? (
+                            <p style={{ color: '#3f3f46', fontSize: '12px' }}>Sin SKUs — se registrarán al recibir la solicitud del proveedor</p>
+                          ) : (
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                              <thead>
+                                <tr style={{ borderBottom: '1px solid #1c1c1f' }}>
+                                  {['Código SKU', 'Talla', 'Stock actual', 'Stock inicial'].map(h => (
+                                    <th key={h} style={thStyle}>{h}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {skus[prenda.id_prenda].map(sku => (
+                                  <tr key={sku.id_sku} style={{ borderBottom: '1px solid #1c1c1f' }}>
+                                    <td style={{ padding: '10px 22px', fontSize: '11px', color: '#52525b', fontFamily: 'var(--font-mono)' }}>{sku.codigo_sku}</td>
+                                    <td style={{ padding: '10px 22px' }}>
+                                      <span style={{ backgroundColor: '#1c1c1f', color: '#71717a', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+                                        {sku.talla}
+                                      </span>
+                                    </td>
+                                    <td style={{ padding: '10px 22px' }}>
+                                      <span style={{ fontSize: '15px', fontWeight: '700', fontFamily: 'var(--font-mono)', color: sku.stock === 0 ? '#3f3f46' : sku.stock <= 5 ? '#c8922a' : '#22c55e' }}>
+                                        {sku.stock}
+                                      </span>
+                                    </td>
+                                    <td style={{ padding: '10px 22px', fontSize: '12px', color: '#52525b', fontFamily: 'var(--font-mono)' }}>{sku.stock_inicial}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
 }
 
 const thStyle: React.CSSProperties = {
-  padding: '8px 16px', textAlign: 'left',
+  padding: '10px 22px', textAlign: 'left',
   fontSize: '10px', color: '#3f3f46', fontWeight: '500',
-  textTransform: 'uppercase', letterSpacing: '1.5px',
+  textTransform: 'uppercase', letterSpacing: '1.5px', whiteSpace: 'nowrap',
 }
-
-const colHeaderStyle: React.CSSProperties = {
-  fontSize: '9px', color: '#3f3f46', fontWeight: '600',
-  textTransform: 'uppercase', letterSpacing: '1.5px',
-}
-
