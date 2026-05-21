@@ -30,7 +30,18 @@ export async function PATCH(
     return NextResponse.json({ error: 'Detalle no encontrado' }, { status: 404 })
   }
 
-  const nuevaCantidad = Number(actual.cantidad_recibida) + incremento
+  // Validar que no se exceda la cantidad solicitada
+  if (Number(actual.cantidad_recibida) >= Number(actual.cantidad_solicitada)) {
+    return NextResponse.json(
+      { error: 'Esta referencia ya fue recibida completa. No se puede agregar más unidades.' },
+      { status: 400 }
+    )
+  }
+
+  const nuevaCantidad = Math.min(
+    Number(actual.cantidad_recibida) + incremento,
+    Number(actual.cantidad_solicitada)
+  )
 
   // 2. Actualizar cantidad_recibida con el acumulado (trigger actualiza stock y estado)
   const { data, error } = await supabase
