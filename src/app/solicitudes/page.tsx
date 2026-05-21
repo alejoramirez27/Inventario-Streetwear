@@ -34,11 +34,10 @@ const subcategorias = {
   ACCESORIOS: ['Gorra', 'Underwear'],
 }
 
-// Tallas según subcategoría: Gorra siempre es Única
-function getTallas(categoria: string, subcategoria: string): string[] {
+// Tallas según subcategoría: Gorra = Única, todo lo demás = XS-S-M-L-XL
+function getTallas(_categoria: string, subcategoria: string): string[] {
   if (subcategoria === 'Gorra') return ['Única']
-  if (categoria === 'ACCESORIOS') return ['Única', 'S/M', 'M/L', 'L/XL']
-  return ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+  return ['XS', 'S', 'M', 'L', 'XL']
 }
 
 function estadoVariant(e: string) {
