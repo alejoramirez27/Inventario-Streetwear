@@ -30,18 +30,27 @@ export async function PATCH(
     return NextResponse.json({ error: 'Detalle no encontrado' }, { status: 404 })
   }
 
-  // Validar que no se exceda la cantidad solicitada
-  if (Number(actual.cantidad_recibida) >= Number(actual.cantidad_solicitada)) {
+  const recibida    = Number(actual.cantidad_recibida)
+  const solicitada  = Number(actual.cantidad_solicitada)
+  const pendientes  = solicitada - recibida
+
+  // Ya estaba completo
+  if (recibida >= solicitada) {
     return NextResponse.json(
       { error: 'Esta referencia ya fue recibida completa. No se puede agregar más unidades.' },
       { status: 400 }
     )
   }
 
-  const nuevaCantidad = Math.min(
-    Number(actual.cantidad_recibida) + incremento,
-    Number(actual.cantidad_solicitada)
-  )
+  // El incremento supera lo que aún falta por recibir
+  if (incremento > pendientes) {
+    return NextResponse.json(
+      { error: `Solo puedes ingresar ${pendientes} unidad${pendientes === 1 ? '' : 'es'} (solicitadas: ${solicitada}, ya recibidas: ${recibida}).` },
+      { status: 400 }
+    )
+  }
+
+  const nuevaCantidad = recibida + incremento
 
   // 2. Actualizar cantidad_recibida con el acumulado (trigger actualiza stock y estado)
   const { data, error } = await supabase
@@ -53,7 +62,7 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-  // 3. Actualizar stock_inicial sumando el mismo incremento
+  // 3. Actualizar stock_inicial sumando el incremento exacto
   const { data: skuData } = await supabase
     .from('sku')
     .select('stock_inicial')
